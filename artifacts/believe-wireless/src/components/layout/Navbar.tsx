@@ -9,6 +9,7 @@ export function Navbar() {
 
   const links = [
     { href: "/plans", label: "Plans" },
+    { href: "/esim", label: "eSIM" },
     { href: "/coverage", label: "Coverage" },
     { href: "/web-messaging", label: "Web Messaging" },
   ];

@@ -9,6 +9,9 @@ import GetNumber from '@/pages/GetNumber';
 import Plans from '@/pages/Plans';
 import Coverage from '@/pages/Coverage';
 import WebMessaging from '@/pages/WebMessaging';
+import EsimCatalogue from '@/pages/EsimCatalogue';
+import EsimDetail from '@/pages/EsimDetail';
+import EsimOrder from '@/pages/EsimOrder';
 import AdminLogin from '@/pages/admin/AdminLogin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminNumbers from '@/pages/admin/AdminNumbers';
@@ -30,6 +33,9 @@ function Router() {
       <Route path="/plans" component={Plans} />
       <Route path="/coverage" component={Coverage} />
       <Route path="/web-messaging" component={WebMessaging} />
+      <Route path="/esim" component={EsimCatalogue} />
+      <Route path="/esim/order/:orderId" component={EsimOrder} />
+      <Route path="/esim/:id" component={EsimDetail} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/numbers" component={AdminNumbers} />
@@ -38,6 +44,7 @@ function Router() {
     </Switch>
   );
 }
+
 
 function App() {
   return (
