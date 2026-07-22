@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Link, useParams, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useGetAdminMe } from "@workspace/api-client-react";
+
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface Network {
@@ -68,8 +70,10 @@ export default function EsimDetail() {
   const { id } = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { data: me } = useGetAdminMe();
 
   const [bundle, setBundle] = useState<Bundle | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [ordering, setOrdering] = useState(false);
@@ -295,11 +299,25 @@ export default function EsimDetail() {
             {/* Right: Buy box */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-3xl p-8 border-2 border-primary shadow-xl shadow-primary/10 sticky top-8">
+                {me?.loggedIn && (
+                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-2xl mb-4 text-xs font-bold flex items-center justify-between shadow-md">
+                    <span className="flex items-center gap-1.5">
+                      👑 Admin VIP Lifetime Pass Active
+                    </span>
+                    <span className="bg-white/20 px-2 py-0.5 rounded-full text-[11px] uppercase tracking-wider">
+                      100% Off ($0.00)
+                    </span>
+                  </div>
+                )}
+
+
                 <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Total</p>
                 <div className="text-5xl font-bold text-gray-900 mb-1">
-                  {bundle.currencySymbol}{bundle.price.toFixed(2)}
+                  {me?.loggedIn ? "$0.00" : `${bundle.currencySymbol}${bundle.price.toFixed(2)}`}
                 </div>
-                <p className="text-sm text-gray-400 mb-6">{bundle.currencyCode} · One-time</p>
+                <p className="text-sm text-gray-400 mb-6">
+                  {me?.loggedIn ? "Admin VIP Unlimited Pass · $0.00" : `${bundle.currencyCode} · One-time`}
+                </p>
 
                 <div className="space-y-2 mb-6 text-sm text-gray-600">
                   <div className="flex justify-between">
@@ -321,16 +339,23 @@ export default function EsimDetail() {
                 </div>
 
                 <Button
-                  className="w-full h-14 rounded-full font-bold text-lg shadow-lg shadow-primary/25"
+                  className={`w-full h-14 rounded-full font-bold text-lg shadow-lg ${
+                    me?.loggedIn
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-indigo-500/25"
+                      : "shadow-primary/25"
+                  }`}
                   onClick={handleBuy}
                   disabled={ordering}
                 >
                   {ordering ? (
-                    <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Processing...</>
+                    <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Provisioning VIP eSIM...</>
+                  ) : me?.loggedIn ? (
+                    <><Zap className="w-5 h-5 mr-2" /> Provision VIP eSIM ($0.00)</>
                   ) : (
                     <><ShoppingCart className="w-5 h-5 mr-2" /> Buy eSIM Now</>
                   )}
                 </Button>
+
 
                 <p className="text-xs text-gray-400 text-center mt-4">
                   eSIM delivered instantly after purchase. No physical SIM required.

@@ -1,11 +1,13 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Crown, Shield } from "lucide-react";
 import { useState } from "react";
+import { useGetAdminMe } from "@workspace/api-client-react";
 
 export function Navbar() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: me } = useGetAdminMe();
 
   const links = [
     { href: "/plans", label: "Plans" },
@@ -18,7 +20,7 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-display font-bold text-xl transition-transform group-hover:scale-105">
                 B
@@ -27,6 +29,14 @@ export function Navbar() {
                 Believe<span className="text-primary">.</span>
               </span>
             </Link>
+
+            {me?.loggedIn && (
+              <Link href="/admin/dashboard">
+                <span className="hidden sm:inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm hover:scale-105 transition-transform cursor-pointer">
+                  <Crown className="w-3.5 h-3.5" /> Admin VIP ($0.00)
+                </span>
+              </Link>
+            )}
           </div>
 
           {/* Desktop Nav */}
@@ -44,7 +54,14 @@ export function Navbar() {
                 </Link>
               ))}
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              {me?.loggedIn && (
+                <Button asChild variant="outline" size="sm" className="rounded-full font-bold border-indigo-200 text-indigo-600 hover:bg-indigo-50">
+                  <Link href="/admin/dashboard">
+                    <Shield className="w-4 h-4 mr-1.5" /> Portal
+                  </Link>
+                </Button>
+              )}
               <Button asChild size="lg" className="rounded-full font-bold px-6">
                 <Link href="/get-free-number">Get Free Number</Link>
               </Button>
@@ -52,7 +69,14 @@ export function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center gap-2">
+            {me?.loggedIn && (
+              <Link href="/admin/dashboard">
+                <span className="inline-flex items-center gap-1 bg-indigo-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                  <Crown className="w-3 h-3" /> VIP
+                </span>
+              </Link>
+            )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="text-gray-600 hover:text-gray-900 p-2"
@@ -65,8 +89,17 @@ export function Navbar() {
 
       {/* Mobile Nav */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-100 p-4 absolute w-full">
+        <div className="md:hidden bg-white border-b border-gray-100 p-4 absolute w-full shadow-lg">
           <div className="flex flex-col space-y-4">
+            {me?.loggedIn && (
+              <Link
+                href="/admin/dashboard"
+                className="bg-indigo-50 text-indigo-700 p-3 rounded-xl font-bold text-sm flex items-center gap-2 border border-indigo-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Crown className="w-4 h-4 text-indigo-600" /> Admin VIP Dashboard ($0.00 Pass Active)
+              </Link>
+            )}
             {links.map((link) => (
               <Link
                 key={link.href}
