@@ -87,9 +87,18 @@ router.get("/admin/financials", requireAdmin, async (req, res): Promise<void> =>
   });
 });
 
-// ── Device & User Lookup ──────────────────────────────────────────────────────
+// ── Device & Subscriber Record Data ──────────────────────────────────────────
 
-interface SubscriberRecord {
+export interface AuditLog {
+  id: string;
+  adminName: string;
+  employeeId: string;
+  action: string;
+  note: string;
+  timestamp: string;
+}
+
+export interface SubscriberRecord {
   id: string;
   userName: string;
   userEmail: string;
@@ -103,6 +112,7 @@ interface SubscriberRecord {
   planCost: string;
   billingCycle: string;
   joinedAt: string;
+  auditLogs: AuditLog[];
 }
 
 const MOCK_SUBSCRIBERS: SubscriberRecord[] = [
@@ -120,6 +130,16 @@ const MOCK_SUBSCRIBERS: SubscriberRecord[] = [
     planCost: "$19.99/mo",
     billingCycle: "Billed $39.98 every 2 months",
     joinedAt: "2026-01-15T08:30:00Z",
+    auditLogs: [
+      {
+        id: "LOG-90123",
+        adminName: "Princeton T. Taylor",
+        employeeId: "EMP-001",
+        action: "ACCOUNT_CREATED",
+        note: "Initial account activation and SignalWire trial line assignment (+18634738499). No fraud triggers detected.",
+        timestamp: "2026-01-15T08:30:00Z",
+      },
+    ],
   },
   {
     id: "SUB-88220",
@@ -135,6 +155,16 @@ const MOCK_SUBSCRIBERS: SubscriberRecord[] = [
     planCost: "$19.99/mo",
     billingCycle: "Billed $39.98 every 2 months",
     joinedAt: "2026-02-01T10:15:00Z",
+    auditLogs: [
+      {
+        id: "LOG-90124",
+        adminName: "Support Specialist Alex",
+        employeeId: "EMP-104",
+        action: "ID_VERIFIED",
+        note: "Verified photo ID & billing address matching card on file. Account cleared for high-speed roaming.",
+        timestamp: "2026-02-01T10:15:00Z",
+      },
+    ],
   },
   {
     id: "SUB-88221",
@@ -150,6 +180,16 @@ const MOCK_SUBSCRIBERS: SubscriberRecord[] = [
     planCost: "$19.99/mo",
     billingCycle: "Billed $39.98 every 2 months",
     joinedAt: "2026-02-10T14:20:00Z",
+    auditLogs: [
+      {
+        id: "LOG-90125",
+        adminName: "Security Lead Jordan",
+        employeeId: "EMP-209",
+        action: "SUSPEND_SERVICE",
+        note: "Suspended line due to suspicious SMS spam activity reported by carrier firewall. Waiting for user identity verification.",
+        timestamp: "2026-02-12T16:45:00Z",
+      },
+    ],
   },
 ];
 
@@ -176,57 +216,83 @@ router.get("/admin/users/search", requireAdmin, async (req, res): Promise<void> 
 });
 
 router.post("/admin/users/action", requireAdmin, async (req, res): Promise<void> => {
-  const { subscriberId, action, amount, note } = req.body || {};
+  const {
+    subscriberId,
+    action,
+    amount,
+    adminName,
+    employeeId,
+    note,
+    // Editable subscriber fields
+    updatedUserName,
+    updatedUserEmail,
+    updatedPhoneNumber,
+    updatedIccid,
+    updatedImei,
+    updatedDeviceModel,
+    updatedStatus,
+  } = req.body || {};
 
   const sub = MOCK_SUBSCRIBERS.find((s) => s.id === subscriberId) || MOCK_SUBSCRIBERS[0];
 
-  if (action === "suspend") {
+  const admin = adminName || req.session?.adminEmail || "Admin Operator";
+  const empId = employeeId || "EMP-88192";
+  const actionNote = note || `Action ${action} executed by ${admin} (ID #${empId})`;
+
+  let actionMessage = "";
+
+  if (action === "edit_user") {
+    if (updatedUserName) sub.userName = updatedUserName;
+    if (updatedUserEmail) sub.userEmail = updatedUserEmail;
+    if (updatedPhoneNumber) sub.phoneNumber = updatedPhoneNumber;
+    if (updatedIccid) sub.iccid = updatedIccid;
+    if (updatedImei) sub.imei = updatedImei;
+    if (updatedDeviceModel) sub.deviceModel = updatedDeviceModel;
+    if (updatedStatus) sub.status = updatedStatus;
+
+    actionMessage = `Subscriber details updated by Admin ${admin} (ID #${empId}).`;
+  } else if (action === "suspend") {
     sub.status = "suspended";
-    res.json({ success: true, message: `Line ${sub.phoneNumber} (ICCID ${sub.iccid}) suspended successfully.` });
-    return;
-  }
-
-  if (action === "reconnect") {
+    actionMessage = `Line ${sub.phoneNumber} (ICCID ${sub.iccid}) suspended successfully.`;
+  } else if (action === "reconnect") {
     sub.status = "active";
-    res.json({ success: true, message: `Line ${sub.phoneNumber} reconnected successfully.` });
-    return;
-  }
-
-  if (action === "blacklist") {
+    actionMessage = `Line ${sub.phoneNumber} reconnected successfully.`;
+  } else if (action === "blacklist") {
     sub.status = "blacklisted";
-    res.json({ success: true, message: `Device IMEI ${sub.imei} blacklisted and reported lost/stolen.` });
-    return;
-  }
-
-  if (action === "add_credit") {
+    actionMessage = `Device IMEI ${sub.imei} blacklisted & reported lost/stolen.`;
+  } else if (action === "add_credit") {
     const added = Number(amount || 10);
     sub.accountCredits += added;
-    res.json({ success: true, message: `$${added.toFixed(2)} credit added to ${sub.userName}. New balance: $${sub.accountCredits.toFixed(2)}` });
-    return;
-  }
-
-  if (action === "refund") {
+    actionMessage = `$${added.toFixed(2)} credit added to ${sub.userName}. New balance: $${sub.accountCredits.toFixed(2)}.`;
+  } else if (action === "refund") {
     const refunded = Number(amount || 39.98);
-    res.json({ success: true, message: `$${refunded.toFixed(2)} refunded for billing cycle.` });
-    return;
-  }
-
-  if (action === "port_number") {
+    actionMessage = `$${refunded.toFixed(2)} refunded for billing cycle.`;
+  } else if (action === "port_number") {
     const portPin = Math.floor(1000 + Math.random() * 9000).toString();
-    res.json({
-      success: true,
-      portInfo: {
-        accountNumber: `BEL-${sub.phoneNumber.replace(/\D/g, "")}`,
-        portPin,
-        billingZip: "33801",
-        carrierName: "Believe Wireless (LimitFlex/SignalWire Network)",
-      },
-      message: `Port-out PIN generated: ${portPin}`,
-    });
+    actionMessage = `Port-out PIN generated: ${portPin} (Account: BEL-${sub.phoneNumber.replace(/\D/g, "")})`;
+  } else {
+    res.status(400).json({ error: "Invalid action requested" });
     return;
   }
 
-  res.status(400).json({ error: "Invalid action requested" });
+  // Create mandatory Audit Log Entry
+  const auditEntry: AuditLog = {
+    id: `LOG-${Date.now().toString().slice(-6)}`,
+    adminName: admin,
+    employeeId: empId,
+    action: action.toUpperCase(),
+    note: actionNote,
+    timestamp: new Date().toISOString(),
+  };
+
+  sub.auditLogs.unshift(auditEntry);
+
+  res.json({
+    success: true,
+    message: actionMessage,
+    subscriber: sub,
+    auditLogs: sub.auditLogs,
+  });
 });
 
 router.get("/admin/numbers", requireAdmin, async (req, res): Promise<void> => {
