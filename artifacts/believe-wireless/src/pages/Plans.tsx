@@ -17,8 +17,8 @@ const DEFAULT_5_PLANS = [
       "Unlimited Wi-Fi calling & texting",
       "Free web messaging portal access",
       "Essential app access (Maps, Email, Rideshare)",
-      "Zero credit card or contract required",
-      "Instant setup in seconds",
+      "+$1.99 One-time SIM installation fee",
+      "+$0.99 Lowest state sales tax (2.5%)",
     ],
     highlight: false,
     badge: "100% Free ($0)",
@@ -33,9 +33,9 @@ const DEFAULT_5_PLANS = [
       "Unlimited nationwide talk & text (cellular network)",
       "No cellular data (0 Data cap)",
       "Billed $9.98 every 2 months ($4.99/mo equivalent)",
+      "+$1.99 One-time SIM installation fee",
+      "+$0.99 Lowest state sales tax (2.5%)",
       "Free local US phone number included",
-      "Instant eSIM QR Code download",
-      "No credit check or contract",
     ],
     highlight: false,
     badge: "TextNow Price Match",
@@ -50,7 +50,8 @@ const DEFAULT_5_PLANS = [
       "2GB full-speed 5G data per month",
       "Unlimited talk & text nationwide",
       "Billed $19.98 every 2 months ($9.99/mo equivalent)",
-      "Mobile hotspot included",
+      "+$1.99 One-time SIM installation fee",
+      "+$0.99 Lowest state sales tax (2.5%)",
       "Instant 1-tap eSIM activation",
     ],
     highlight: false,
@@ -67,8 +68,8 @@ const DEFAULT_5_PLANS = [
       "Unlimited talk & text nationwide",
       "Billed $39.98 every 2 months ($19.99/mo equivalent)",
       "Unlimited mobile hotspot included",
-      "Priority 5G network access",
-      "Save 50% vs AT&T, Verizon & T-Mobile",
+      "+$1.99 One-time SIM installation fee",
+      "+$0.99 Lowest state sales tax (2.5%)",
     ],
     highlight: true,
     badge: "🔥 Most Popular",
@@ -83,7 +84,8 @@ const DEFAULT_5_PLANS = [
       "Unlimited 5G data in US & Canada",
       "International roaming in 150+ countries",
       "Billed $59.98 every 2 months ($29.99/mo equivalent)",
-      "Unlimited talk, text & mobile hotspot",
+      "+$1.99 One-time SIM installation fee",
+      "+$0.99 Lowest state sales tax (2.5%)",
       "VIP customer support",
     ],
     highlight: false,
@@ -103,14 +105,14 @@ export default function Plans() {
           {/* Heading */}
           <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs uppercase tracking-wider mb-4 border border-emerald-200">
-              <Sparkles className="w-4 h-4 text-emerald-600" /> TextNow Price Match Guarantee
+              <Sparkles className="w-4 h-4 text-emerald-600" /> Lowest Sales Tax & Transparent Fees
             </div>
             <h1 className="text-4xl md:text-6xl font-bold font-display text-gray-900 mb-4 tracking-tight">
               Same Great Prices as TextNow. <br />
-              <span className="text-primary">Better 5G Coverage.</span>
+              <span className="text-primary">Clear & Honest Pricing.</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-600">
-              From <strong>$0 Free Flex</strong> and <strong>$4.99/mo Talk & Text</strong> to <strong>$19.99/mo Unlimited 5G</strong> (billed $39.98 every 2 months), get TextNow pricing with zero contracts.
+              Pick your plan + <strong>$1.99 one-time SIM installation fee</strong> + <strong>$0.99 lowest telecom sales tax (2.5%)</strong>. Zero hidden contracts.
             </p>
           </div>
 
@@ -149,6 +151,9 @@ export default function Plans() {
                       </div>
                       <p className="text-[11px] font-bold text-primary mt-1">
                         {(plan as any).billingCycle || `Billed every 2 months`}
+                      </p>
+                      <p className="text-[10px] text-emerald-700 font-semibold mt-1">
+                        +$1.99 SIM Setup · +$0.99 Tax (2.5%)
                       </p>
                     </div>
 

@@ -134,6 +134,26 @@ export default function GetNumber() {
                     {TRIAL_NUMBER.rateCenter}, {TRIAL_NUMBER.region}
                   </div>
 
+                  {/* Itemized Order & Fee Breakdown */}
+                  <div className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-6 text-xs text-gray-700 space-y-2">
+                    <div className="flex justify-between font-medium">
+                      <span>Believe Wireless Plan</span>
+                      <span>$19.99 / mo</span>
+                    </div>
+                    <div className="flex justify-between font-medium text-emerald-700">
+                      <span>SIM Card / eSIM Installation Fee</span>
+                      <span>+$1.99 <span className="text-[10px] text-gray-400 font-normal">(One-time)</span></span>
+                    </div>
+                    <div className="flex justify-between font-medium text-emerald-700">
+                      <span>Lowest State Telecom Sales Tax (2.5%)</span>
+                      <span>+$0.99</span>
+                    </div>
+                    <div className="border-t border-gray-200 pt-2 flex justify-between font-bold text-sm text-gray-900">
+                      <span>Total Setup Today</span>
+                      <span className="text-primary">$2.98 Fees + Plan</span>
+                    </div>
+                  </div>
+
                   {/* Optional personalisation fields */}
                   <div className="w-full space-y-3 mb-6 text-left">
                     <div>
@@ -160,6 +180,7 @@ export default function GetNumber() {
                       />
                     </div>
                   </div>
+
 
                   <Button
                     className="w-full rounded-full h-12 font-bold text-base"
