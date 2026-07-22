@@ -80,131 +80,69 @@ export default function Home() {
         </div>
       </section>
 
-      {/* High-Converting Best Offers Showcase */}
+      {/* Unified Unlimited Offer Showcase */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-14">
+          <div className="text-center max-w-3xl mx-auto mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs uppercase tracking-wider mb-4 border border-emerald-200">
-              🔥 Featured Best Offers
+              🔥 Official All-Inclusive Plan
             </div>
             <h2 className="text-4xl md:text-5xl font-bold font-display text-gray-900 mb-4">
-              Choose your perfect plan.
+              Everything Unlimited. One Simple Price.
             </h2>
             <p className="text-lg text-gray-600">
-              No hidden fees, no credit checks, and no long-term contracts. Pick an offer below to get started in seconds.
+              No hidden fees, no credit checks, and no contracts. Just <strong>$39.98 billed every 2 months</strong> ($19.99/mo).
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
-            {/* Offer 1: Free Flex */}
-            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative">
-              <div>
-                <span className="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
-                  ⚡ 100% Free Starter
-                </span>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Free Flex Line</h3>
-                <p className="text-gray-500 text-sm mb-6">
-                  Get a free US phone number with unlimited Wi-Fi calling & web messaging.
-                </p>
-                <div className="mb-6 flex items-baseline">
-                  <span className="text-4xl font-bold font-display text-gray-900">$0</span>
-                  <span className="text-gray-500 text-sm ml-2">/ forever free</span>
-                </div>
-                <ul className="space-y-3 text-sm text-gray-700 mb-8">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Free local phone number
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Unlimited Wi-Fi talk & text
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Web messaging portal access
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> No credit card required
-                  </li>
-                </ul>
-              </div>
-              <Button asChild size="lg" variant="outline" className="w-full rounded-full font-bold h-12 border-2">
-                <Link href="/get-free-number">Claim Free Number</Link>
-              </Button>
-            </div>
-
-            {/* Offer 2: Unlimited 5G (Highlighted Best Seller) */}
-            <div className="bg-white border-2 border-primary rounded-3xl p-8 flex flex-col justify-between shadow-2xl shadow-primary/15 relative lg:-translate-y-2">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-extrabold px-4 py-1 rounded-full uppercase tracking-wider shadow-md">
-                🔥 Most Popular — Save 50%
+          <div className="max-w-xl mx-auto">
+            <div className="bg-white border-2 border-primary rounded-3xl p-8 md:p-10 flex flex-col justify-between shadow-2xl shadow-primary/15 relative">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-extrabold px-5 py-1 rounded-full uppercase tracking-wider shadow-md">
+                🔥 Unlimited 5G Plan — $39.98 / 2 Months
               </div>
               <div>
-                <div className="mt-2 mb-4">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-1">Unlimited 5G Data</h3>
+                <div className="mt-2 mb-4 text-center">
+                  <h3 className="text-3xl font-bold text-gray-900 mb-2">Unlimited 5G Data, Talk & Text</h3>
                   <p className="text-gray-500 text-sm">
-                    Truly unlimited nationwide 5G data, talk & text. Billed as $39.98 every 2 months.
+                    Complete nationwide coverage with high-speed 5G data, unlimited talk, text, and instant eSIM access.
                   </p>
                 </div>
-                <div className="mb-6 flex items-baseline">
+                <div className="mb-6 flex items-baseline justify-center">
                   <span className="text-5xl font-bold font-display text-gray-900">$19.99</span>
-                  <span className="text-gray-500 text-sm ml-2">/ month</span>
+                  <span className="text-gray-500 text-sm ml-2 font-medium">/ month</span>
                 </div>
-                <div className="bg-primary/5 p-3 rounded-xl text-xs font-semibold text-primary mb-6">
-                  💡 Billed as $39.98 every 2 months for maximum savings.
+                <div className="bg-primary/5 p-3.5 rounded-2xl text-xs font-bold text-primary text-center mb-6 border border-primary/10">
+                  ⚡ Billed as $39.98 every 2 months for maximum savings.
                 </div>
-                <ul className="space-y-3 text-sm text-gray-700 mb-8">
+                <ul className="space-y-3.5 text-sm text-gray-700 mb-8">
                   <li className="flex items-center gap-2 font-semibold">
-                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Unlimited full-speed 5G data
+                    <CheckCircle2 className="w-4.5 h-4.5 text-primary shrink-0" /> Unlimited full-speed 5G & 4G LTE data
+                  </li>
+                  <li className="flex items-center gap-2 font-semibold">
+                    <CheckCircle2 className="w-4.5 h-4.5 text-primary shrink-0" /> Unlimited talk & text nationwide
+                  </li>
+                  <li className="flex items-center gap-2 font-semibold">
+                    <CheckCircle2 className="w-4.5 h-4.5 text-primary shrink-0" /> Billed as $39.98 every 2 months ($19.99/mo equivalent)
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Nationwide 5G & 4G LTE network
+                    <CheckCircle2 className="w-4.5 h-4.5 text-primary shrink-0" /> Unlimited mobile hotspot included
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> Unlimited mobile hotspot
+                    <CheckCircle2 className="w-4.5 h-4.5 text-primary shrink-0" /> Free local US phone number & web messaging
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" /> International texting included
+                    <CheckCircle2 className="w-4.5 h-4.5 text-primary shrink-0" /> 1-Tap iPhone & Android eSIM QR code download
                   </li>
                 </ul>
               </div>
-              <Button asChild size="lg" className="w-full rounded-full font-bold h-12 shadow-lg shadow-primary/25">
-                <Link href="/plans">Get Unlimited 5G Plan</Link>
-              </Button>
-            </div>
-
-            {/* Offer 3: Global Travel eSIM */}
-            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative">
-              <div>
-                <span className="inline-block bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
-                  ✈️ Travel & eSIM Data
-                </span>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Global eSIM Pass</h3>
-                <p className="text-gray-500 text-sm mb-6">
-                  Instant high-speed cellular data in 150+ countries. No physical SIM card required.
-                </p>
-                <div className="mb-6 flex items-baseline">
-                  <span className="text-4xl font-bold font-display text-gray-900">$2.26</span>
-                  <span className="text-gray-500 text-sm ml-2">/ starting price</span>
-                </div>
-                <ul className="space-y-3 text-sm text-gray-700 mb-8">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Instant QR Code download
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> 1-Tap iPhone & Android setup
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> 150+ international countries
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Keep your existing phone number
-                  </li>
-                </ul>
-              </div>
-              <Button asChild size="lg" variant="outline" className="w-full rounded-full font-bold h-12 border-2">
-                <Link href="/esim">Browse eSIM Plans</Link>
+              <Button asChild size="lg" className="w-full rounded-full font-bold h-14 text-lg shadow-lg shadow-primary/25">
+                <Link href="/get-free-number">Get Unlimited Plan ($39.98 / 2 mo)</Link>
               </Button>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* Press Logos */}
       <section className="border-y border-gray-100 bg-gray-50 py-10">
