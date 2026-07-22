@@ -48,13 +48,14 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
           <StatCard label="Numbers Claimed" value={stats?.totalNumbersClaimed ?? 1} icon={Phone} color="bg-indigo-600" />
           <StatCard label="Messages Sent" value={stats?.totalMessagesSent ?? 0} icon={MessageSquare} color="bg-violet-600" />
           <StatCard label="Total Users" value={stats?.totalUsers ?? 1} icon={Users} color="bg-blue-600" />
           <StatCard label="Coverage States" value={stats?.coverageStates ?? 50} icon={Globe} color="bg-cyan-600" />
-          <StatCard label="Wholesale eSIM Balance" value="$50.06 USD" icon={Phone} color="bg-emerald-600" />
+          <StatCard label="eSIM Balance" value="$50.06 USD" icon={Phone} color="bg-emerald-600" />
         </div>
+
 
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
