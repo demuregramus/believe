@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Download,
   Wifi,
+  Apple,
 } from "lucide-react";
 import { Link, useParams } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -62,11 +63,19 @@ interface Transaction {
   };
 }
 
-// ── Android steps ─────────────────────────────────────────────────────────────
+// ── Device Install Steps ─────────────────────────────────────────────────────
+
+const IOS_STEPS = [
+  { step: "1", title: "Open Settings", desc: "On your iPhone, open the Settings app." },
+  { step: "2", title: "Go to Cellular / Mobile Data", desc: 'Tap "Cellular" (or "Mobile Data" depending on your country).' },
+  { step: "3", title: "Add eSIM", desc: 'Tap "Add eSIM" or "Add Cellular Plan".' },
+  { step: "4", title: "Scan QR or Enter Manually", desc: 'Select "Use QR Code" and scan the QR below. Or tap "Enter Details Manually" and paste the SM-DP+ Address & Activation Code.' },
+  { step: "5", title: "Label & Confirm", desc: "Label your new cellular line (e.g., Believe Wireless) and complete setup." },
+];
 
 const ANDROID_STEPS = [
   { step: "1", title: "Open Settings", desc: "On your Android phone, open the Settings app." },
-  { step: "2", title: "Go to Network & Internet", desc: 'Tap "Network & internet" or "Connections" depending on your phone manufacturer.' },
+  { step: "2", title: "Go to Network & Internet", desc: 'Tap "Network & internet" or "Connections" depending on manufacturer.' },
   { step: "3", title: "Add eSIM", desc: 'Tap "SIMs" → "Add SIM" or "Download a SIM instead".' },
   { step: "4", title: "Scan QR Code", desc: 'Choose "Scan a QR code" and point your camera at the QR below.' },
   { step: "5", title: "Confirm & Activate", desc: "Follow on-screen prompts. Your eSIM activates automatically on first network connection." },
@@ -138,6 +147,7 @@ export default function EsimOrder() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedDevice, setSelectedDevice] = useState<"ios" | "android">("ios");
 
   const fetchTransaction = useCallback(async (): Promise<Transaction | null> => {
     if (!transactionId) return null;
@@ -163,7 +173,6 @@ export default function EsimOrder() {
       // eSIMs not ready yet — will retry on next poll
     }
   }, [transactionId]);
-
 
   // Initial load
   useEffect(() => {
@@ -321,7 +330,7 @@ export default function EsimOrder() {
                 {/* QR Code */}
                 <div className="text-center mb-6">
                   <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                    Scan to Install eSIM
+                    Scan to Install eSIM (iPhone & Android)
                   </p>
                   <div className="inline-block p-4 bg-white rounded-3xl border-2 border-primary shadow-lg mb-4">
                     <img
@@ -331,14 +340,14 @@ export default function EsimOrder() {
                     />
                   </div>
                   <p className="text-sm text-gray-400 mb-4">
-                    Scan this QR code from your Android eSIM settings
+                    Scan this QR code using your iPhone Camera or eSIM settings
                   </p>
                   <div className="flex justify-center gap-2 flex-wrap">
                     <Button
                       variant="outline"
                       size="sm"
                       className="rounded-full"
-                      onClick={() => copy(esim.lpaString, "LPA string")}
+                      onClick={() => copy(esim.lpaString, "LPA String")}
                     >
                       <Copy className="w-4 h-4 mr-2" /> Copy LPA String
                     </Button>
@@ -360,7 +369,7 @@ export default function EsimOrder() {
 
                 {/* eSIM details */}
                 <div className="bg-gray-50 rounded-2xl p-5 space-y-3">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">eSIM Details</p>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">eSIM Details & Manual Entry</p>
                   {[
                     { label: "ICCID", value: esim.iccid },
                     { label: "Coverage", value: esim.coverage },
@@ -411,54 +420,131 @@ export default function EsimOrder() {
             )}
           </div>
 
-          {/* Android Install Guide */}
+          {/* Installation Guide Tabs */}
           <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-              <Smartphone className="w-5 h-5 text-green-600" />
-              Install on Android
-            </h2>
-            <p className="text-sm text-gray-400 mb-6">
-              Follow these steps on any eSIM-compatible Android device.
-            </p>
+            <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                Installation Guide
+              </h2>
+              {/* Tab Selector */}
+              <div className="flex bg-gray-100 p-1 rounded-full text-xs font-semibold">
+                <button
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full transition-all ${
+                    selectedDevice === "ios"
+                      ? "bg-white text-gray-900 shadow-sm font-bold"
+                      : "text-gray-500 hover:text-gray-900"
+                  }`}
+                  onClick={() => setSelectedDevice("ios")}
+                >
+                  <Apple className="w-4 h-4" /> iPhone (iOS)
+                </button>
+                <button
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full transition-all ${
+                    selectedDevice === "android"
+                      ? "bg-white text-gray-900 shadow-sm font-bold"
+                      : "text-gray-500 hover:text-gray-900"
+                  }`}
+                  onClick={() => setSelectedDevice("android")}
+                >
+                  <Smartphone className="w-4 h-4 text-green-600" /> Android
+                </button>
+              </div>
+            </div>
 
-            <div className="space-y-4 mb-8">
-              {ANDROID_STEPS.map((s) => (
-                <div key={s.step} className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center shrink-0 mt-0.5">
-                    {s.step}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">{s.title}</p>
-                    <p className="text-sm text-gray-500">{s.desc}</p>
-                  </div>
+            {/* iPhone Guide */}
+            {selectedDevice === "ios" && (
+              <div>
+                <p className="text-sm text-gray-400 mb-6">
+                  Follow these steps on any eSIM-compatible iPhone (iPhone XS, 11, 12, 13, 14, 15, 16 & newer).
+                </p>
+
+                <div className="space-y-4 mb-8">
+                  {IOS_STEPS.map((s) => (
+                    <div key={s.step} className="flex gap-4">
+                      <div className="w-8 h-8 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center shrink-0 mt-0.5">
+                        {s.step}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">{s.title}</p>
+                        <p className="text-sm text-gray-500">{s.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            {/* Deep link shortcut */}
-            <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mb-4">
-              <p className="font-semibold text-green-800 mb-1 flex items-center gap-2">
-                <Smartphone className="w-4 h-4" /> Already on your Android device?
-              </p>
-              <p className="text-sm text-green-700 mb-3">
-                Tap below to jump directly to your Android eSIM settings.
-              </p>
-              <Button
-                className="rounded-full bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => {
-                  window.location.href =
-                    "intent://settings/network#Intent;scheme=android-app;package=com.android.settings;end";
-                }}
-              >
-                <Smartphone className="w-4 h-4 mr-2" />
-                Open Android eSIM Settings
-              </Button>
-            </div>
+                {/* iPhone Deep Link */}
+                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 mb-4">
+                  <p className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                    <Apple className="w-4 h-4" /> Already browsing on your iPhone?
+                  </p>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Open iPhone Cellular settings directly or scan the QR code above using your iPhone camera app.
+                  </p>
+                  <Button
+                    className="rounded-full bg-gray-900 hover:bg-black text-white"
+                    onClick={() => {
+                      window.location.href = "App-Prefs:root=MOBILE_DATA_SETTINGS_ID";
+                    }}
+                  >
+                    <Apple className="w-4 h-4 mr-2" />
+                    Open iPhone Cellular Settings
+                  </Button>
+                </div>
 
-            <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl text-sm text-blue-700">
-              <strong>Compatibility:</strong> Your device must support eSIM and be SIM-unlocked.
-              Most Android phones from 2019 onwards include eSIM support.
-            </div>
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl text-sm text-blue-700">
+                  <strong>iPhone Compatibility:</strong> All iPhones from iPhone XS / XR (2018) onwards support eSIM. iPhone 14, 15, and 16 models in the US are eSIM-only.
+                </div>
+              </div>
+            )}
+
+            {/* Android Guide */}
+            {selectedDevice === "android" && (
+              <div>
+                <p className="text-sm text-gray-400 mb-6">
+                  Follow these steps on any eSIM-compatible Android device (Samsung, Google Pixel, Motorola, Xiaomi, etc.).
+                </p>
+
+                <div className="space-y-4 mb-8">
+                  {ANDROID_STEPS.map((s) => (
+                    <div key={s.step} className="flex gap-4">
+                      <div className="w-8 h-8 rounded-full bg-green-600 text-white text-sm font-bold flex items-center justify-center shrink-0 mt-0.5">
+                        {s.step}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">{s.title}</p>
+                        <p className="text-sm text-gray-500">{s.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Android Deep Link */}
+                <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mb-4">
+                  <p className="font-semibold text-green-800 mb-1 flex items-center gap-2">
+                    <Smartphone className="w-4 h-4" /> Already on your Android device?
+                  </p>
+                  <p className="text-sm text-green-700 mb-3">
+                    Tap below to jump directly to your Android eSIM settings.
+                  </p>
+                  <Button
+                    className="rounded-full bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => {
+                      window.location.href =
+                        "intent://settings/network#Intent;scheme=android-app;package=com.android.settings;end";
+                    }}
+                  >
+                    <Smartphone className="w-4 h-4 mr-2" />
+                    Open Android eSIM Settings
+                  </Button>
+                </div>
+
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl text-sm text-blue-700">
+                  <strong>Android Compatibility:</strong> Your device must support eSIM and be SIM-unlocked.
+                  Most Android phones from 2019 onwards include eSIM support.
+                </div>
+              </div>
+            )}
+
           </div>
 
         </div>
