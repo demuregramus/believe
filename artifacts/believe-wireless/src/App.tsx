@@ -34,7 +34,7 @@ function Router() {
       <Route path="/coverage" component={Coverage} />
       <Route path="/web-messaging" component={WebMessaging} />
       <Route path="/esim" component={EsimCatalogue} />
-      <Route path="/esim/order/:orderId" component={EsimOrder} />
+      <Route path="/esim/order/:transactionId" component={EsimOrder} />
       <Route path="/esim/:id" component={EsimDetail} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />

@@ -100,7 +100,7 @@ export default function EsimDetail() {
       const order = await res.json();
       toast({
         title: "Order placed!",
-        description: `Order ID: ${order.id}. Retrieving your eSIM...`,
+        description: `Preparing your eSIM — Transaction #${order.id}`,
       });
       setLocation(`/esim/order/${order.id}`);
     } catch {
