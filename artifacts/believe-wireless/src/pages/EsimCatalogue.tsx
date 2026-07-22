@@ -225,22 +225,28 @@ export default function EsimCatalogue() {
     <MainLayout>
       <div className="bg-gray-50 min-h-screen">
         {/* Hero */}
-        <div className="bg-gradient-to-br from-primary/5 via-white to-primary/10 border-b border-gray-100 py-16">
+        <div className="bg-gradient-to-br from-primary/5 via-white to-primary/10 border-b border-gray-100 py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
-              <Globe className="w-4 h-4" />
-              eSIM Data Plans — 180+ Countries
+            <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 border border-emerald-200 px-4 py-1.5 rounded-full text-sm font-bold mb-6">
+              <Zap className="w-4 h-4 text-emerald-600" />
+              100% Included with Every Believe Wireless Plan ($0.00 Extra)
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4 tracking-tight">
-              Stay connected{" "}
-              <span className="text-primary">everywhere.</span>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+              All-In-One <span className="text-primary">eSIM Activation.</span>
             </h1>
-            <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-              Instant eSIM activation. No contracts. Works on any unlocked
-              Android device with eSIM support.
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
+              You do <strong>NOT</strong> need to buy a separate eSIM package. Every Believe Wireless plan includes your phone number, 5G data, and eSIM QR code all in one single service.
             </p>
+            <div className="inline-flex items-center gap-3 bg-white p-2 px-4 rounded-full border border-gray-200 shadow-sm text-xs font-semibold text-gray-700">
+              <span>✅ iPhone &amp; Android Ready</span>
+              <span>•</span>
+              <span>✅ 1-Tap QR Installation</span>
+              <span>•</span>
+              <span>✅ $0 Extra Activation Fee</span>
+            </div>
           </div>
         </div>
+
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           {/* Filters */}

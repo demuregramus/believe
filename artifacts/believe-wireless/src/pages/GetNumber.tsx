@@ -74,27 +74,31 @@ export default function GetNumber() {
               </div>
 
               {/* Branded confirmation banner */}
-              <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-2xl p-4 mb-8 text-left">
-                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                <p className="text-sm text-green-800">
-                  <strong>Your line is active!</strong> You can now use your Believe Wireless number for instant Web Messaging or download an eSIM to access nationwide 5G data on your phone.
-                </p>
+              <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl p-5 mb-8 text-left">
+                <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-emerald-900 text-base mb-1">Your All-In-One eSIM Line is Active!</h4>
+                  <p className="text-sm text-emerald-800">
+                    Your wireless plan, talk, text, 5G data, and eSIM profile are 100% included in one single service. Download your eSIM QR code below or start messaging on the web instantly.
+                  </p>
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <Button asChild size="lg" className="rounded-full font-bold h-14 shadow-lg shadow-primary/20">
                   <Link href={`/web-messaging?number=${encodeURIComponent(TRIAL_NUMBER.phoneNumber)}`}>
                     <MessageCircle className="w-5 h-5 mr-2" />
-                    Start Messaging
+                    Start Web Messaging
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="rounded-full font-bold h-14 border-2">
-                  <Link href="/esim">
+                <Button asChild variant="outline" size="lg" className="rounded-full font-bold h-14 border-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50">
+                  <Link href="/esim/order/98124">
                     <Phone className="w-5 h-5 mr-2" />
-                    Get an eSIM / Data Service
+                    Download Included eSIM (QR Code)
                   </Link>
                 </Button>
               </div>
+
 
             </div>
           ) : (
