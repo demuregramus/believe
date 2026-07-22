@@ -2,13 +2,15 @@ import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { useAdminLogout, useGetAdminMe } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, Phone, MessageSquare, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Phone, MessageSquare, LogOut, Menu, X, Smartphone } from "lucide-react";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/users", label: "Users & Devices", icon: Smartphone },
   { href: "/admin/numbers", label: "Numbers", icon: Phone },
   { href: "/admin/messages", label: "Messages", icon: MessageSquare },
 ];
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();

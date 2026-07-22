@@ -42,18 +42,19 @@ const DEFAULT_PLANS = [
     id: "unlimited",
     name: "Unlimited 5G",
     price: "$19.99",
-    description: "Truly unlimited 5G data, talk & text with no speed throttling after a cap.",
+    description: "Truly unlimited 5G data, talk & text. Billed as $39.98 every 2 months for maximum savings.",
     features: [
       "Everything in Basic 5G",
       "Unlimited full-speed 5G data",
-      "Unlimited hotspot",
-      "International texting",
-      "Priority network access",
-      "Multi-line discounts available",
+      "Billed $39.98 every 2 months ($19.99/mo)",
+      "Unlimited mobile hotspot",
+      "International texting included",
+      "Priority 5G network access",
     ],
-    highlight: false,
-    badge: "Best Value",
+    highlight: true,
+    badge: "Most Popular",
   },
+
 ];
 
 export default function Plans() {

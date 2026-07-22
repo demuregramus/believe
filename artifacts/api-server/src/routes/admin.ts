@@ -67,6 +67,168 @@ router.get("/admin/me", async (req, res): Promise<void> => {
   res.json({ email: req.session.adminEmail, loggedIn: true });
 });
 
+// ── Financial P&L Analytics ───────────────────────────────────────────────────
+
+router.get("/admin/financials", requireAdmin, async (req, res): Promise<void> => {
+  res.json({
+    activeSubscribers: 20000,
+    biMonthlyRate: 39.98,
+    monthlyRate: 19.99,
+    monthlyGrossRevenue: 399800.0,
+    monthlyWholesaleCosts: 160000.0,
+    monthlyNetProfit: 239800.0,
+    netProfitMarginPct: 60.0,
+    yearlyGrossRevenue: 4797600.0,
+    yearlyNetProfit: 2877600.0,
+    dailyNetProfitAvg: 7883.84,
+    weeklyNetProfitAvg: 55338.46,
+    wholesaleBalance: 50.06,
+    currency: "USD",
+  });
+});
+
+// ── Device & User Lookup ──────────────────────────────────────────────────────
+
+interface SubscriberRecord {
+  id: string;
+  userName: string;
+  userEmail: string;
+  phoneNumber: string;
+  iccid: string;
+  imei: string;
+  deviceModel: string;
+  status: "active" | "suspended" | "blacklisted";
+  accountCredits: number;
+  planName: string;
+  planCost: string;
+  billingCycle: string;
+  joinedAt: string;
+}
+
+const MOCK_SUBSCRIBERS: SubscriberRecord[] = [
+  {
+    id: "SUB-88219",
+    userName: "Princeton T. Taylor",
+    userEmail: "demuregram@gmail.com",
+    phoneNumber: "+18634738499",
+    iccid: "898821100000018293F",
+    imei: "352094109823411",
+    deviceModel: "iPhone 15 Pro Max (eSIM)",
+    status: "active",
+    accountCredits: 25.0,
+    planName: "Unlimited 5G Data & SMS",
+    planCost: "$19.99/mo",
+    billingCycle: "Billed $39.98 every 2 months",
+    joinedAt: "2026-01-15T08:30:00Z",
+  },
+  {
+    id: "SUB-88220",
+    userName: "Sarah Connor",
+    userEmail: "sarah.connor@example.com",
+    phoneNumber: "+14155550199",
+    iccid: "898821100000018294A",
+    imei: "359821098273612",
+    deviceModel: "Samsung Galaxy S24 Ultra",
+    status: "active",
+    accountCredits: 0.0,
+    planName: "Unlimited 5G Data & SMS",
+    planCost: "$19.99/mo",
+    billingCycle: "Billed $39.98 every 2 months",
+    joinedAt: "2026-02-01T10:15:00Z",
+  },
+  {
+    id: "SUB-88221",
+    userName: "Marcus Vance",
+    userEmail: "marcus.vance@example.com",
+    phoneNumber: "+13055550182",
+    iccid: "898821100000018295B",
+    imei: "867821094112938",
+    deviceModel: "Google Pixel 8 Pro",
+    status: "suspended",
+    accountCredits: 0.0,
+    planName: "Unlimited 5G Data & SMS",
+    planCost: "$19.99/mo",
+    billingCycle: "Billed $39.98 every 2 months",
+    joinedAt: "2026-02-10T14:20:00Z",
+  },
+];
+
+router.get("/admin/users/search", requireAdmin, async (req, res): Promise<void> => {
+  const query = String(req.query.query || "").toLowerCase().trim();
+
+  if (!query) {
+    res.json({ subscribers: MOCK_SUBSCRIBERS, total: MOCK_SUBSCRIBERS.length });
+    return;
+  }
+
+  const filtered = MOCK_SUBSCRIBERS.filter(
+    (s) =>
+      s.userName.toLowerCase().includes(query) ||
+      s.userEmail.toLowerCase().includes(query) ||
+      s.phoneNumber.includes(query) ||
+      s.iccid.toLowerCase().includes(query) ||
+      s.imei.toLowerCase().includes(query) ||
+      s.deviceModel.toLowerCase().includes(query) ||
+      s.status.toLowerCase().includes(query)
+  );
+
+  res.json({ subscribers: filtered, total: filtered.length });
+});
+
+router.post("/admin/users/action", requireAdmin, async (req, res): Promise<void> => {
+  const { subscriberId, action, amount, note } = req.body || {};
+
+  const sub = MOCK_SUBSCRIBERS.find((s) => s.id === subscriberId) || MOCK_SUBSCRIBERS[0];
+
+  if (action === "suspend") {
+    sub.status = "suspended";
+    res.json({ success: true, message: `Line ${sub.phoneNumber} (ICCID ${sub.iccid}) suspended successfully.` });
+    return;
+  }
+
+  if (action === "reconnect") {
+    sub.status = "active";
+    res.json({ success: true, message: `Line ${sub.phoneNumber} reconnected successfully.` });
+    return;
+  }
+
+  if (action === "blacklist") {
+    sub.status = "blacklisted";
+    res.json({ success: true, message: `Device IMEI ${sub.imei} blacklisted and reported lost/stolen.` });
+    return;
+  }
+
+  if (action === "add_credit") {
+    const added = Number(amount || 10);
+    sub.accountCredits += added;
+    res.json({ success: true, message: `$${added.toFixed(2)} credit added to ${sub.userName}. New balance: $${sub.accountCredits.toFixed(2)}` });
+    return;
+  }
+
+  if (action === "refund") {
+    const refunded = Number(amount || 39.98);
+    res.json({ success: true, message: `$${refunded.toFixed(2)} refunded for billing cycle.` });
+    return;
+  }
+
+  if (action === "port_number") {
+    const portPin = Math.floor(1000 + Math.random() * 9000).toString();
+    res.json({
+      success: true,
+      portInfo: {
+        accountNumber: `BEL-${sub.phoneNumber.replace(/\D/g, "")}`,
+        portPin,
+        billingZip: "33801",
+        carrierName: "Believe Wireless (LimitFlex/SignalWire Network)",
+      },
+      message: `Port-out PIN generated: ${portPin}`,
+    });
+    return;
+  }
+
+  res.status(400).json({ error: "Invalid action requested" });
+});
+
 router.get("/admin/numbers", requireAdmin, async (req, res): Promise<void> => {
   const parsed = AdminListNumbersQueryParams.safeParse(req.query);
   if (!parsed.success) {

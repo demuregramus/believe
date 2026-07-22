@@ -14,6 +14,7 @@ import EsimDetail from '@/pages/EsimDetail';
 import EsimOrder from '@/pages/EsimOrder';
 import AdminLogin from '@/pages/admin/AdminLogin';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminUsers from '@/pages/admin/AdminUsers';
 import AdminNumbers from '@/pages/admin/AdminNumbers';
 import AdminMessages from '@/pages/admin/AdminMessages';
 
@@ -38,12 +39,14 @@ function Router() {
       <Route path="/esim/:id" component={EsimDetail} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin/numbers" component={AdminNumbers} />
       <Route path="/admin/messages" component={AdminMessages} />
       <Route component={NotFound} />
     </Switch>
   );
 }
+
 
 
 function App() {
