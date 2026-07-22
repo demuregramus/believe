@@ -340,33 +340,45 @@ export default function EsimOrder() {
                       <Apple className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg text-white">iPhone 1-Click Smooth Setup</h3>
-                      <p className="text-xs text-gray-300">Works on all eSIM-compatible iPhones (iPhone XS through iPhone 16)</p>
+                      <h3 className="font-bold text-lg text-white">iPhone 1-Click Direct Carrier Profile</h3>
+                      <p className="text-xs text-gray-300">Permanent fix: Download profile directly to iPhone without QR scanning errors</p>
                     </div>
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-3 mt-4">
                     <Button
                       size="lg"
-                      className="rounded-full font-bold bg-white text-gray-900 hover:bg-gray-100 h-12 text-sm shadow-md"
-                      onClick={() => copy(esim.lpaString, "iPhone Activation Code")}
+                      className="rounded-full font-bold bg-emerald-500 text-white hover:bg-emerald-600 h-12 text-sm shadow-md"
+                      asChild
                     >
-                      <Copy className="w-4 h-4 mr-2 text-primary" /> 1-Click Copy iPhone Code
+                      <a href="/api/esim/apple-config/98124" download="believe-wireless.mobileconfig">
+                        <Download className="w-4 h-4 mr-2" /> Install iPhone Profile (1-Click)
+                      </a>
                     </Button>
                     <Button
                       size="lg"
-                      className="rounded-full font-bold bg-primary text-white hover:bg-primary/90 h-12 text-sm shadow-md"
-                      onClick={() => {
-                        window.location.href = "App-Prefs:root=MOBILE_DATA_SETTINGS_ID";
-                      }}
+                      className="rounded-full font-bold bg-white text-gray-900 hover:bg-gray-100 h-12 text-sm shadow-md"
+                      onClick={() => copy(esim.lpaString, "iPhone Activation Code")}
                     >
-                      <Apple className="w-4 h-4 mr-2" /> Open Cellular Settings
+                      <Copy className="w-4 h-4 mr-2 text-primary" /> Copy Manual LPA Code
                     </Button>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-white/10 text-xs text-gray-300 flex items-center justify-between">
-                    <span>💡 Tap <strong>Cellular → Add eSIM → Use QR Code</strong> (or paste code manually)</span>
+                  <div className="mt-4 pt-3 border-t border-white/10 text-xs text-gray-300 space-y-1">
+                    <p>💡 <strong>Direct iPhone Installation:</strong> Tap <strong>Install iPhone Profile</strong> above → Tap <strong>Allow</strong> → Open iPhone <strong>Settings → Profile Downloaded → Install</strong>.</p>
                   </div>
+                </div>
+
+                {/* iPhone Unlock & Activation Troubleshooting Guide */}
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-xs text-amber-900">
+                  <p className="font-bold text-sm mb-1 text-amber-950 flex items-center gap-1.5">
+                    ⚠️ Fix "Unable to Activate eSIM" Errors Permanently
+                  </p>
+                  <ul className="space-y-1 list-disc pl-4 text-amber-800">
+                    <li><strong>Check Carrier Lock:</strong> On your iPhone, go to <strong>Settings → General → About</strong> and confirm <strong>Carrier Lock</strong> displays <em>"No SIM restrictions"</em>.</li>
+                    <li><strong>Wi-Fi Connection:</strong> Ensure your iPhone is connected to an active Wi-Fi network during activation.</li>
+                    <li><strong>Manual Entry Option:</strong> If camera scanning fails, tap <strong>Add Cellular Plan → Enter Details Manually</strong> and paste <code>cust-sub.limitflex.com</code> as SM-DP+ Address.</li>
+                  </ul>
                 </div>
 
                 {/* QR Code */}
@@ -384,6 +396,7 @@ export default function EsimOrder() {
                   <p className="text-sm text-gray-400 mb-4">
                     Scan this QR code using your iPhone Camera app or Settings → Cellular → Add eSIM
                   </p>
+
 
                   <div className="flex justify-center gap-2 flex-wrap">
                     <Button

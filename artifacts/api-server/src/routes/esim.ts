@@ -44,7 +44,7 @@ const MOCK_ESIMS = [
   {
     iccid: "898821100000018293F",
     installed: false,
-    smdpAddress: "rsp-eu.limitflex.com",
+    smdpAddress: "cust-sub.limitflex.com",
     smdpStatus: "RELEASED",
     activationCode: "KL6B7OQ59SDB",
     coverage: "USA & 150+ Global Countries (5G)",
@@ -64,9 +64,63 @@ const MOCK_ESIMS = [
         expiryTime: new Date(Date.now() + 7 * 86400000).toISOString(),
       },
     ],
-    lpaString: "LPA:1$rsp-eu.limitflex.com$KL6B7OQ59SDB",
+    lpaString: "LPA:1$cust-sub.limitflex.com$KL6B7OQ59SDB",
   },
 ];
+
+// ── Apple Mobileconfig Profile Endpoint ──────────────────────────────────────
+
+// GET /esim/apple-config/:id — Direct 1-click iPhone Carrier Profile installer
+router.get("/esim/apple-config/:id", (_req, res): void => {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>PayloadDescription</key>
+            <string>Configures Believe Wireless 5G Cellular Data &amp; Web Messaging Profile</string>
+            <key>PayloadDisplayName</key>
+            <string>Believe Wireless 5G Cellular</string>
+            <key>PayloadIdentifier</key>
+            <string>com.believewireless.cellular</string>
+            <key>PayloadType</key>
+            <string>com.apple.cellular</string>
+            <key>PayloadUUID</key>
+            <string>3A8D27F0-5C9B-4D1E-8F2A-0A7B6C5D4E3F</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>APNs</key>
+            <array>
+                <dict>
+                    <key>Name</key>
+                    <string>Believe 5G APN</string>
+                    <key>APN</key>
+                    <string>wholesale</string>
+                </dict>
+            </array>
+        </dict>
+    </array>
+    <key>PayloadDisplayName</key>
+    <string>Believe Wireless eSIM Profile</string>
+    <key>PayloadIdentifier</key>
+    <string>com.believewireless.profile</string>
+    <key>PayloadOrganization</key>
+    <string>Believe Wireless (Demuregram LLC)</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>9F8E7D6C-5B4A-3F2E-1D0C-9B8A7F6E5D4C</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+</dict>
+</plist>`;
+
+  res.setHeader("Content-Type", "application/x-apple-asn1-signed-data");
+  res.setHeader("Content-Disposition", 'attachment; filename="believe-wireless.mobileconfig"');
+  res.send(xml);
+});
 
 // ── Catalogue ────────────────────────────────────────────────────────────────
 
