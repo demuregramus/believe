@@ -152,7 +152,12 @@ export default function GetNumber() {
                       <span>Total Setup Today</span>
                       <span className="text-primary">$2.98 Fees + Plan</span>
                     </div>
+                    <div className="pt-2 text-[10px] text-gray-400 text-left border-t border-gray-100 space-y-1">
+                      <p>⚖️ <strong>State Law Compliance:</strong> Auto-renews bi-monthly every 2 months. Cancel anytime in 1-click with 0 cancellation fees.</p>
+                      <p>🛡️ <strong>FCC Registered Carrier:</strong> FCC FRN 0038671103 (Demuregram LLC).</p>
+                    </div>
                   </div>
+
 
                   {/* Optional personalisation fields */}
                   <div className="w-full space-y-3 mb-6 text-left">
