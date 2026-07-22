@@ -251,3 +251,44 @@ export async function getTransactions(params: {
   qs.set("pageSize", String(params.pageSize ?? 20));
   return limitflexFetch(`/transactions?${qs}`);
 }
+
+// ── Account ───────────────────────────────────────────────────────────────────
+
+export async function getAccountBalance(): Promise<LimitFlexAccountBalance> {
+  return limitflexFetch<LimitFlexAccountBalance>("/accounts");
+}
+
+// ── Webhooks ──────────────────────────────────────────────────────────────────
+
+export async function getWebhook(): Promise<LimitFlexWebhook> {
+  return limitflexFetch<LimitFlexWebhook>("/webhook");
+}
+
+export async function createWebhook(url: string): Promise<LimitFlexWebhook> {
+  return limitflexFetch<LimitFlexWebhook>("/webhook", {
+    method: "POST",
+    body: JSON.stringify({ url }),
+  });
+}
+
+export async function setWebhookEnabled(enabled: boolean): Promise<LimitFlexWebhook> {
+  return limitflexFetch<LimitFlexWebhook>("/webhook", {
+    method: "PUT",
+    body: JSON.stringify({ enabled }),
+  });
+}
+
+export async function deleteWebhook(): Promise<void> {
+  return limitflexFetch<void>("/webhook", { method: "DELETE" });
+}
+
+// ── Reference data ────────────────────────────────────────────────────────────
+
+export async function getZones(): Promise<LimitFlexZone[]> {
+  return limitflexFetch<LimitFlexZone[]>("/zones");
+}
+
+export async function getNetworks(): Promise<unknown[]> {
+  return limitflexFetch<unknown[]>("/networks");
+}
+
