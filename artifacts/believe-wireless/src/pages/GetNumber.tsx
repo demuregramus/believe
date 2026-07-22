@@ -38,11 +38,13 @@ export default function GetNumber() {
       {
         onSuccess: (data) => {
           setClaimedNumber(data.friendlyName);
+          localStorage.setItem("believe_active_number", TRIAL_NUMBER.phoneNumber);
           toast({
             title: "Number Claimed!",
             description: `You now have access to ${data.friendlyName}`,
           });
         },
+
         onError: () => {
           toast({
             title: "Failed to claim number",

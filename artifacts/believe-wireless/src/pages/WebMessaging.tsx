@@ -10,25 +10,24 @@ import { useSearch } from "wouter";
 export default function WebMessaging() {
   const search = useSearch();
   const params = new URLSearchParams(search);
-  const prefilledNumber = params.get("number") ?? "";
+  const urlNumber = params.get("number");
+  
+  const savedNumber = typeof window !== "undefined" ? localStorage.getItem("believe_active_number") : null;
+  const initialNumber = urlNumber || savedNumber || "+18634738499";
 
-  const [phoneNumber, setPhoneNumber] = useState(prefilledNumber);
-  const [activeNumber, setActiveNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(initialNumber);
+  const [activeNumber, setActiveNumber] = useState(initialNumber ? (initialNumber.startsWith("+") ? initialNumber : `+1${initialNumber.replace(/\D/g, "")}`) : "");
   const [recipient, setRecipient] = useState("");
   const [messageBody, setMessageBody] = useState("");
 
   const { toast } = useToast();
 
-  // Auto-login if a number was passed via query string (e.g. redirect from GetNumber)
   useEffect(() => {
-    if (prefilledNumber) {
-      const cleaned = prefilledNumber.replace(/\D/g, "");
-      if (cleaned.length >= 10) {
-        const formatted = cleaned.startsWith("1") ? `+${cleaned}` : `+1${cleaned}`;
-        setActiveNumber(formatted);
-      }
+    if (activeNumber) {
+      localStorage.setItem("believe_active_number", activeNumber);
     }
-  }, [prefilledNumber]);
+  }, [activeNumber]);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data: messages, isLoading: isLoadingMessages, refetch } = useListMessages(
