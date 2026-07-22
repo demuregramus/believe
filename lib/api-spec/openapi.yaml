@@ -3,13 +3,24 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Believe Wireless API — powered by SignalWire
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: phone-numbers
+    description: Phone number search and provisioning
+  - name: plans
+    description: Wireless service plans
+  - name: messages
+    description: SMS messaging
+  - name: stats
+    description: Platform statistics
+  - name: webhooks
+    description: SignalWire webhook endpoints
+
 paths:
   /healthz:
     get:
@@ -24,6 +35,189 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /phone-numbers/available:
+    get:
+      operationId: listAvailableNumbers
+      tags: [phone-numbers]
+      summary: Search available phone numbers
+      description: Search for available phone numbers to claim via SignalWire
+      parameters:
+        - name: areaCode
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 3-digit US area code to search within
+        - name: contains
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Digits the number should contain
+      responses:
+        "200":
+          description: List of available phone numbers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailablePhoneNumber"
+        "500":
+          description: Error fetching from SignalWire
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /phone-numbers/claim:
+    post:
+      operationId: claimPhoneNumber
+      tags: [phone-numbers]
+      summary: Claim a phone number
+      description: Provision a phone number through SignalWire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhoneNumberClaim"
+      responses:
+        "201":
+          description: Phone number successfully claimed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimedPhoneNumber"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Error provisioning number
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /plans:
+    get:
+      operationId: listPlans
+      tags: [plans]
+      summary: List available service plans
+      description: Returns all available Believe Wireless service plans
+      responses:
+        "200":
+          description: List of plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Plan"
+
+  /messages:
+    get:
+      operationId: listMessages
+      tags: [messages]
+      summary: Get message history
+      description: Retrieve SMS message history for a phone number
+      parameters:
+        - name: phoneNumber
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The phone number to retrieve messages for
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Max number of messages to return (default 50)
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+        "400":
+          description: Missing phoneNumber
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send an SMS message
+      description: Send an SMS via SignalWire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Error sending message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /signalwire/webhook:
+    post:
+      operationId: signalwireWebhook
+      tags: [webhooks]
+      summary: SignalWire inbound message webhook
+      description: Receives incoming SMS from SignalWire and stores them
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/WebhookPayload"
+      responses:
+        "200":
+          description: Webhook processed
+          content:
+            text/xml:
+              schema:
+                type: string
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [stats]
+      summary: Get platform statistics
+      description: Returns aggregate platform statistics for display on the landing page
+      responses:
+        "200":
+          description: Platform stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +228,177 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    AvailablePhoneNumber:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: E.164 formatted phone number
+        friendlyName:
+          type: string
+          description: Human-readable phone number
+        region:
+          type: string
+          description: US state/region
+        rateCenter:
+          type: string
+          description: Rate center / city
+        monthlyFee:
+          type: string
+          description: Monthly cost (typically "$0.00")
+      required:
+        - phoneNumber
+        - friendlyName
+        - region
+        - rateCenter
+        - monthlyFee
+
+    PhoneNumberClaim:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          description: E.164 phone number to claim
+        userEmail:
+          type: string
+          description: Email of user claiming the number (optional)
+        userName:
+          type: string
+          description: Name of user claiming the number (optional)
+      required:
+        - phoneNumber
+
+    ClaimedPhoneNumber:
+      type: object
+      properties:
+        sid:
+          type: string
+        phoneNumber:
+          type: string
+        friendlyName:
+          type: string
+        status:
+          type: string
+        claimedAt:
+          type: string
+      required:
+        - sid
+        - phoneNumber
+        - friendlyName
+        - status
+        - claimedAt
+
+    Plan:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: string
+          description: Monthly price (e.g. "$0", "$9.99")
+        description:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        highlight:
+          type: boolean
+          description: Whether this plan should be visually highlighted
+        badge:
+          type: ["string", "null"]
+          description: Optional badge text (e.g. "Most Popular")
+      required:
+        - id
+        - name
+        - price
+        - description
+        - features
+        - highlight
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        body:
+          type: string
+        direction:
+          type: string
+          enum: [inbound, outbound-api]
+        status:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - from
+        - to
+        - body
+        - direction
+        - status
+        - createdAt
+
+    MessageInput:
+      type: object
+      properties:
+        from:
+          type: string
+          description: Sender phone number (E.164)
+        to:
+          type: string
+          description: Recipient phone number (E.164)
+        body:
+          type: string
+          description: Message text
+      required:
+        - from
+        - to
+        - body
+
+    WebhookPayload:
+      type: object
+      properties:
+        From:
+          type: string
+        To:
+          type: string
+        Body:
+          type: string
+        MessageSid:
+          type: string
+      required:
+        - From
+        - To
+        - Body
+
+    Stats:
+      type: object
+      properties:
+        totalNumbersClaimed:
+          type: integer
+        totalMessagesSent:
+          type: integer
+        totalUsers:
+          type: integer
+        coverageStates:
+          type: integer
+      required:
+        - totalNumbersClaimed
+        - totalMessagesSent
+        - totalUsers
+        - coverageStates

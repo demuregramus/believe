@@ -18,3 +18,10 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[userenv]
+
+[userenv.shared]
+SIGNALWIRE_API_TOKEN = "PTbd6bce7da6e0bab1960ee4a260d925be22af2ba817d4fc57"
+SIGNALWIRE_PROJECT_ID = "dce9fe57-7237-4a59-9521-1cabbd77fc27"
+SIGNALWIRE_SPACE_URL = "demuregram.signalwire.com"
