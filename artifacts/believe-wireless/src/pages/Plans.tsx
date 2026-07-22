@@ -7,85 +7,87 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const DEFAULT_5_PLANS = [
   {
+    id: "free-flex",
+    name: "Free Flex (TextNow Match)",
+    price: "$0",
+    billingCycle: "$0.00 Forever Free",
+    description: "100% Free local US phone number with unlimited Wi-Fi calling & web messaging. Zero credit card required.",
+    features: [
+      "100% Free local US phone number",
+      "Unlimited Wi-Fi calling & texting",
+      "Free web messaging portal access",
+      "Essential app access (Maps, Email, Rideshare)",
+      "Zero credit card or contract required",
+      "Instant setup in seconds",
+    ],
+    highlight: false,
+    badge: "100% Free ($0)",
+  },
+  {
     id: "talk-text",
     name: "Talk & Text Only",
     price: "$4.99",
     billingCycle: "Billed $9.98 every 2 months",
-    description: "Cheapest plan for voice & messaging. Unlimited talk & text with NO cellular data.",
+    description: "Nationwide cellular talk & text with NO Wi-Fi required and NO data limits.",
     features: [
-      "Unlimited talk & text nationwide",
-      "No cellular data included (0 Data)",
-      "Billed $9.98 every 2 months ($4.99/mo)",
-      "Free local US phone number",
-      "Wi-Fi calling & web messaging portal",
-      "Compatible with any cell phone",
+      "Unlimited nationwide talk & text (cellular network)",
+      "No cellular data (0 Data cap)",
+      "Billed $9.98 every 2 months ($4.99/mo equivalent)",
+      "Free local US phone number included",
+      "Instant eSIM QR Code download",
+      "No credit check or contract",
     ],
     highlight: false,
-    badge: "Cheapest Plan",
+    badge: "TextNow Price Match",
   },
   {
     id: "basic",
-    name: "Basic 5G (1GB)",
+    name: "Basic 5G (2GB)",
     price: "$9.99",
     billingCycle: "Billed $19.98 every 2 months",
-    description: "Light data plan with 1GB full-speed 5G data plus unlimited talk & text.",
+    description: "Everyday 5G data plan with 2GB full-speed data plus unlimited talk & text.",
     features: [
-      "1GB full-speed 5G data per month",
+      "2GB full-speed 5G data per month",
       "Unlimited talk & text nationwide",
-      "Billed $19.98 every 2 months ($9.99/mo)",
-      "Wi-Fi calling & web messaging",
-      "Instant eSIM QR Code download",
-    ],
-    highlight: false,
-    badge: null,
-  },
-  {
-    id: "starter",
-    name: "Starter 5G (5GB)",
-    price: "$14.99",
-    billingCycle: "Billed $29.98 every 2 months",
-    description: "5GB of high-speed 5G data for regular browsing, maps, and messaging.",
-    features: [
-      "5GB full-speed 5G data per month",
-      "Unlimited talk & text nationwide",
-      "Billed $29.98 every 2 months ($14.99/mo)",
+      "Billed $19.98 every 2 months ($9.99/mo equivalent)",
       "Mobile hotspot included",
-      "Instant eSIM QR Code download",
+      "Instant 1-tap eSIM activation",
     ],
     highlight: false,
-    badge: null,
+    badge: "TextNow Price Match",
   },
   {
     id: "unlimited",
     name: "Unlimited 5G",
     price: "$19.99",
     billingCycle: "Billed $39.98 every 2 months",
-    description: "Truly unlimited nationwide 5G data, talk, text & mobile hotspot.",
+    description: "Flagship unlimited plan. Truly unlimited 5G data, talk, text & mobile hotspot.",
     features: [
       "Unlimited full-speed 5G & 4G LTE data",
       "Unlimited talk & text nationwide",
-      "Billed $39.98 every 2 months ($19.99/mo)",
+      "Billed $39.98 every 2 months ($19.99/mo equivalent)",
       "Unlimited mobile hotspot included",
       "Priority 5G network access",
+      "Save 50% vs AT&T, Verizon & T-Mobile",
     ],
     highlight: true,
-    badge: "Most Popular",
+    badge: "🔥 Most Popular",
   },
   {
     id: "global-ultra",
     name: "Global Ultra 5G",
     price: "$29.99",
     billingCycle: "Billed $59.98 every 2 months",
-    description: "Unlimited nationwide 5G data PLUS international roaming in 150+ countries.",
+    description: "Unlimited 5G data in US & Canada PLUS international roaming in 150+ countries.",
     features: [
       "Unlimited 5G data in US & Canada",
       "International roaming in 150+ countries",
-      "Billed $59.98 every 2 months ($29.99/mo)",
+      "Billed $59.98 every 2 months ($29.99/mo equivalent)",
       "Unlimited talk, text & mobile hotspot",
       "VIP customer support",
     ],
     highlight: false,
-    badge: "Ultimate Travel",
+    badge: "Ultimate Travel Pass",
   },
 ];
 
@@ -100,15 +102,15 @@ export default function Plans() {
 
           {/* Heading */}
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider mb-4 border border-primary/20">
-              <Sparkles className="w-4 h-4" /> 5 Flexible Plans Billed Every 2 Months
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs uppercase tracking-wider mb-4 border border-emerald-200">
+              <Sparkles className="w-4 h-4 text-emerald-600" /> TextNow Price Match Guarantee
             </div>
             <h1 className="text-4xl md:text-6xl font-bold font-display text-gray-900 mb-4 tracking-tight">
-              Honest plans. <br />
-              <span className="text-primary">No contracts or hidden fees.</span>
+              Same Great Prices as TextNow. <br />
+              <span className="text-primary">Better 5G Coverage.</span>
             </h1>
             <p className="text-lg md:text-xl text-gray-600">
-              From our cheapest <strong>Talk & Text Only ($4.99/mo)</strong> plan to <strong>Unlimited 5G ($19.99/mo)</strong>, pick the plan that fits your life.
+              From <strong>$0 Free Flex</strong> and <strong>$4.99/mo Talk & Text</strong> to <strong>$19.99/mo Unlimited 5G</strong> (billed $39.98 every 2 months), get TextNow pricing with zero contracts.
             </p>
           </div>
 
@@ -148,7 +150,6 @@ export default function Plans() {
                       <p className="text-[11px] font-bold text-primary mt-1">
                         {(plan as any).billingCycle || `Billed every 2 months`}
                       </p>
-
                     </div>
 
                     <ul className="space-y-2.5 mb-6 text-gray-700 text-xs">
@@ -170,7 +171,7 @@ export default function Plans() {
                     }`}
                   >
                     <Link href="/get-free-number">
-                      Select Plan
+                      {plan.price === "$0" ? "Claim Free Line" : "Select Plan"}
                     </Link>
                   </Button>
                 </div>
