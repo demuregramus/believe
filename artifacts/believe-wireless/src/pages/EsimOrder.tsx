@@ -143,6 +143,8 @@ export default function EsimOrder() {
     if (!transactionId) return null;
     const res = await fetch(`/api/esim/transactions/${transactionId}`);
     if (!res.ok) throw new Error("Transaction not found");
+    const ct = res.headers.get("content-type");
+    if (!ct || !ct.includes("application/json")) throw new Error("Invalid server response");
     return res.json();
   }, [transactionId]);
 
@@ -151,13 +153,17 @@ export default function EsimOrder() {
     try {
       const res = await fetch(`/api/esim/transactions/${transactionId}/esims`);
       if (res.ok) {
-        const data: Esim[] = await res.json();
-        setEsims(data);
+        const ct = res.headers.get("content-type");
+        if (ct && ct.includes("application/json")) {
+          const data: Esim[] = await res.json();
+          setEsims(data);
+        }
       }
     } catch {
       // eSIMs not ready yet — will retry on next poll
     }
   }, [transactionId]);
+
 
   // Initial load
   useEffect(() => {

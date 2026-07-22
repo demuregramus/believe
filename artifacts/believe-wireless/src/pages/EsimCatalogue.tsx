@@ -81,9 +81,17 @@ async function fetchCatalogue(params: {
   qs.set("page", String(params.page));
   qs.set("pageSize", String(params.pageSize));
   const res = await fetch(`/api/esim/catalogue?${qs}`);
-  if (!res.ok) throw new Error("Failed to fetch catalogue");
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `Server returned status ${res.status}`);
+  }
+  const contentType = res.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+    throw new Error("Server returned HTML response instead of JSON. Ensure Express API server is running.");
+  }
   return res.json();
 }
+
 
 // ── Plan Card ────────────────────────────────────────────────────────────────
 

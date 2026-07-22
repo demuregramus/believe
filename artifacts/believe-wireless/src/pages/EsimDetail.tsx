@@ -78,14 +78,19 @@ export default function EsimDetail() {
     if (!id) return;
     setLoading(true);
     fetch(`/api/esim/catalogue/${id}`)
-      .then((r) => {
+      .then(async (r) => {
         if (!r.ok) throw new Error("Plan not found");
+        const ct = r.headers.get("content-type");
+        if (!ct || !ct.includes("application/json")) {
+          throw new Error("Invalid server response");
+        }
         return r.json();
       })
       .then(setBundle)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [id]);
+
 
   const handleBuy = async () => {
     if (!bundle) return;
