@@ -147,7 +147,13 @@ export default function EsimOrder() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedDevice, setSelectedDevice] = useState<"ios" | "android">("ios");
+  const [selectedDevice, setSelectedDevice] = useState<"ios" | "android">(() => {
+    if (typeof navigator !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      return "ios";
+    }
+    return "ios";
+  });
+
 
   const fetchTransaction = useCallback(async (): Promise<Transaction | null> => {
     if (!transactionId) return null;
@@ -327,10 +333,46 @@ export default function EsimOrder() {
             {/* Successful — show QR + details */}
             {isSuccessful && esim && (
               <div>
+                {/* iPhone 1-Click Installer Box */}
+                <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-black text-white rounded-3xl p-6 mb-8 shadow-xl border border-gray-700">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                      <Apple className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg text-white">iPhone 1-Click Smooth Setup</h3>
+                      <p className="text-xs text-gray-300">Works on all eSIM-compatible iPhones (iPhone XS through iPhone 16)</p>
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-3 mt-4">
+                    <Button
+                      size="lg"
+                      className="rounded-full font-bold bg-white text-gray-900 hover:bg-gray-100 h-12 text-sm shadow-md"
+                      onClick={() => copy(esim.lpaString, "iPhone Activation Code")}
+                    >
+                      <Copy className="w-4 h-4 mr-2 text-primary" /> 1-Click Copy iPhone Code
+                    </Button>
+                    <Button
+                      size="lg"
+                      className="rounded-full font-bold bg-primary text-white hover:bg-primary/90 h-12 text-sm shadow-md"
+                      onClick={() => {
+                        window.location.href = "App-Prefs:root=MOBILE_DATA_SETTINGS_ID";
+                      }}
+                    >
+                      <Apple className="w-4 h-4 mr-2" /> Open Cellular Settings
+                    </Button>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-white/10 text-xs text-gray-300 flex items-center justify-between">
+                    <span>💡 Tap <strong>Cellular → Add eSIM → Use QR Code</strong> (or paste code manually)</span>
+                  </div>
+                </div>
+
                 {/* QR Code */}
                 <div className="text-center mb-6">
                   <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                    Scan to Install eSIM (iPhone & Android)
+                    Scan to Install eSIM (iPhone & Android Camera)
                   </p>
                   <div className="inline-block p-4 bg-white rounded-3xl border-2 border-primary shadow-lg mb-4">
                     <img
@@ -340,8 +382,9 @@ export default function EsimOrder() {
                     />
                   </div>
                   <p className="text-sm text-gray-400 mb-4">
-                    Scan this QR code using your iPhone Camera or eSIM settings
+                    Scan this QR code using your iPhone Camera app or Settings → Cellular → Add eSIM
                   </p>
+
                   <div className="flex justify-center gap-2 flex-wrap">
                     <Button
                       variant="outline"
