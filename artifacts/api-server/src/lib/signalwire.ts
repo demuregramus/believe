@@ -82,6 +82,31 @@ export async function provisionPhoneNumber(phoneNumber: string): Promise<SignalW
   return (await res.json()) as SignalWireIncomingNumber;
 }
 
+/**
+ * Fetch an already-purchased incoming number from the SignalWire account by its
+ * E.164 phone number string (e.g. "+18634738499").
+ * Returns null if the number is not found on the account.
+ */
+export async function getExistingNumber(
+  phoneNumber: string
+): Promise<SignalWireIncomingNumber | null> {
+  const url = new URL(`${BASE_URL}/IncomingPhoneNumbers.json`);
+  url.searchParams.set("PhoneNumber", phoneNumber);
+
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: authHeader(), Accept: "application/json" },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    logger.error({ status: res.status, body: text }, "SignalWire get existing number error");
+    throw new Error(`SignalWire error fetching existing number: ${res.status}`);
+  }
+
+  const data = (await res.json()) as { incoming_phone_numbers: SignalWireIncomingNumber[] };
+  return data.incoming_phone_numbers?.[0] ?? null;
+}
+
 export async function sendSms(params: {
   from: string;
   to: string;
