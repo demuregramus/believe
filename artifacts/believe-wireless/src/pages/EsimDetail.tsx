@@ -299,24 +299,21 @@ export default function EsimDetail() {
             {/* Right: Buy box */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-3xl p-8 border-2 border-primary shadow-xl shadow-primary/10 sticky top-8">
-                {me?.loggedIn && (
-                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-2xl mb-4 text-xs font-bold flex items-center justify-between shadow-md">
-                    <span className="flex items-center gap-1.5">
-                      👑 Admin VIP Lifetime Pass Active
-                    </span>
-                    <span className="bg-white/20 px-2 py-0.5 rounded-full text-[11px] uppercase tracking-wider">
-                      100% Off ($0.00)
-                    </span>
-                  </div>
-                )}
-
-
-                <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Total</p>
-                <div className="text-5xl font-bold text-gray-900 mb-1">
-                  {me?.loggedIn ? "$0.00" : `${bundle.currencySymbol}${bundle.price.toFixed(2)}`}
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-2xl mb-4 text-xs font-bold flex items-center justify-between shadow-sm">
+                  <span className="flex items-center gap-1.5">
+                    ⚡ 100% Free eSIM Profile Included
+                  </span>
+                  <span className="bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[11px] uppercase tracking-wider">
+                    $0.00
+                  </span>
                 </div>
-                <p className="text-sm text-gray-400 mb-6">
-                  {me?.loggedIn ? "Admin VIP Unlimited Pass · $0.00" : `${bundle.currencyCode} · One-time`}
+
+                <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">eSIM Profile Fee</p>
+                <div className="text-5xl font-bold text-emerald-600 mb-1">
+                  $0.00
+                </div>
+                <p className="text-sm text-emerald-700 font-semibold mb-6">
+                  Included Free With Your Believe Wireless Plan
                 </p>
 
                 <div className="space-y-2 mb-6 text-sm text-gray-600">
@@ -333,28 +330,23 @@ export default function EsimDetail() {
                     <span className="font-semibold text-gray-900">{bundle.roamingCountries.length}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Delivery</span>
-                    <span className="font-semibold text-green-600">Instant QR Code</span>
+                    <span>eSIM QR Delivery</span>
+                    <span className="font-semibold text-green-600">Instant ($0.00)</span>
                   </div>
                 </div>
 
                 <Button
-                  className={`w-full h-14 rounded-full font-bold text-lg shadow-lg ${
-                    me?.loggedIn
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-indigo-500/25"
-                      : "shadow-primary/25"
-                  }`}
+                  className="w-full h-14 rounded-full font-bold text-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/25"
                   onClick={handleBuy}
                   disabled={ordering}
                 >
                   {ordering ? (
-                    <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Provisioning VIP eSIM...</>
-                  ) : me?.loggedIn ? (
-                    <><Zap className="w-5 h-5 mr-2" /> Provision VIP eSIM ($0.00)</>
+                    <><Loader2 className="w-5 h-5 animate-spin mr-2" /> Generating QR Code...</>
                   ) : (
-                    <><ShoppingCart className="w-5 h-5 mr-2" /> Buy eSIM Now</>
+                    <><Zap className="w-5 h-5 mr-2" /> Download Free eSIM ($0.00)</>
                   )}
                 </Button>
+
 
 
                 <p className="text-xs text-gray-400 text-center mt-4">

@@ -170,19 +170,19 @@ function PlanCard({ bundle }: { bundle: EsimBundle }) {
         {/* Price + CTA */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-2">
           <div>
-            <span className="text-2xl font-bold text-gray-900">
-              {bundle.currencySymbol}
-              {bundle.price.toFixed(2)}
+            <span className="text-2xl font-bold text-emerald-600">
+              $0.00
             </span>
-            <span className="text-sm text-gray-400 ml-1">
-              {bundle.currencyCode}
+            <span className="text-xs text-emerald-700 font-semibold block">
+              Free with Plan
             </span>
           </div>
           <div className="flex items-center gap-1 text-primary font-semibold text-sm group-hover:gap-2 transition-all">
-            Get Plan
+            Get Free eSIM
             <ChevronRight className="w-4 h-4" />
           </div>
         </div>
+
       </div>
     </Link>
   );
