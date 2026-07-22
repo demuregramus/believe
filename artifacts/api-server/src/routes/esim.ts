@@ -28,8 +28,9 @@ router.get("/esim/catalogue", async (req, res): Promise<void> => {
     res.json(data);
   } catch (err) {
     req.log.error({ err }, "Error fetching eSIM catalogue");
-    res.status(500).json({ error: "Failed to fetch eSIM catalogue" });
+    res.status(500).json({ error: (err as Error).message || "Failed to fetch eSIM catalogue" });
   }
+
 });
 
 // GET /esim/catalogue/:id

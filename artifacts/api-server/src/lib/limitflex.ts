@@ -2,15 +2,22 @@ import { logger } from "./logger";
 
 const BASE_URL =
   process.env.LIMITFLEX_BASE_URL ?? "https://esim-api.limitflex.com/v1/api";
-const API_KEY = process.env.LIMITFLEX_API_KEY ?? "";
+
+function getApiKey(): string {
+  return (
+    process.env.LIMITFLEX_API_KEY ||
+    "8ZI5mRZSqUfR7A6fQzU8v5hHVkVdLoY4iokYv3UPvNbmCiDtWlAwktiu"
+  );
+}
 
 function authHeaders() {
   return {
-    "X-API-Key": API_KEY,
+    "X-API-Key": getApiKey(),
     Accept: "application/json",
     "Content-Type": "application/json",
   };
 }
+
 
 async function limitflexFetch<T>(
   path: string,
