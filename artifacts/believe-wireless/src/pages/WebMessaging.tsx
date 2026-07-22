@@ -3,16 +3,32 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { useListMessages, useSendMessage, getListMessagesQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Phone, Send, User, MessageCircle, AlertCircle, Loader2, CheckCircle2 } from "lucide-react";
+import { Send, User, MessageCircle, AlertCircle, Loader2, CheckCircle2, FlaskConical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSearch } from "wouter";
 
 export default function WebMessaging() {
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const prefilledNumber = params.get("number") ?? "";
+
+  const [phoneNumber, setPhoneNumber] = useState(prefilledNumber);
   const [activeNumber, setActiveNumber] = useState("");
   const [recipient, setRecipient] = useState("");
   const [messageBody, setMessageBody] = useState("");
-  
+
   const { toast } = useToast();
+
+  // Auto-login if a number was passed via query string (e.g. redirect from GetNumber)
+  useEffect(() => {
+    if (prefilledNumber) {
+      const cleaned = prefilledNumber.replace(/\D/g, "");
+      if (cleaned.length >= 10) {
+        const formatted = cleaned.startsWith("1") ? `+${cleaned}` : `+1${cleaned}`;
+        setActiveNumber(formatted);
+      }
+    }
+  }, [prefilledNumber]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data: messages, isLoading: isLoadingMessages, refetch } = useListMessages(
@@ -110,10 +126,25 @@ export default function WebMessaging() {
                   </div>
                 </div>
               </div>
-              <div className="flex-grow p-6">
+              <div className="flex-grow p-6 space-y-3">
                 <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm flex gap-3 items-start border border-blue-100">
                   <AlertCircle className="w-5 h-5 shrink-0 text-blue-500" />
                   <p>Welcome to Web Messaging! Enter a recipient number and start typing to send an SMS via your Believe number.</p>
+                </div>
+                <div className="bg-amber-50 text-amber-800 p-4 rounded-xl text-sm flex gap-3 items-start border border-amber-200">
+                  <FlaskConical className="w-5 h-5 shrink-0 text-amber-500" />
+                  <p>
+                    <strong>Trial mode:</strong> Outbound SMS can only reach{" "}
+                    <strong>verified numbers</strong>. Add recipients at{" "}
+                    <a
+                      href="https://demuregram.signalwire.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      demuregram.signalwire.com
+                    </a>.
+                  </p>
                 </div>
               </div>
               <div className="p-4 border-t border-gray-200">
