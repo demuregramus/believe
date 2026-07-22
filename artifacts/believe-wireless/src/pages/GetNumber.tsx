@@ -73,21 +73,11 @@ export default function GetNumber() {
                 {claimedNumber}
               </div>
 
-              {/* Trial notice */}
-              <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-8 text-left">
-                <FlaskConical className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-800">
-                  <strong>Trial account:</strong> SMS can only be sent to phone numbers you have
-                  verified in your SignalWire trial console. Add a number at{" "}
-                  <a
-                    href="https://demuregram.signalwire.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                  >
-                    demuregram.signalwire.com
-                  </a>{" "}
-                  → Settings → Trial Number Verification.
+              {/* Branded confirmation banner */}
+              <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-2xl p-4 mb-8 text-left">
+                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <p className="text-sm text-green-800">
+                  <strong>Your line is active!</strong> You can now use your Believe Wireless number for instant Web Messaging or download an eSIM to access nationwide 5G data on your phone.
                 </p>
               </div>
 
@@ -111,10 +101,9 @@ export default function GetNumber() {
             /* ── Pick number state ── */
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
-                {/* Trial badge */}
-                <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-700 border border-amber-200 px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
-                  <FlaskConical className="w-4 h-4" />
-                  Trial Account — 1 Number Available
+                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
+                  <Phone className="w-4 h-4" />
+                  Official Believe Wireless Line
                 </div>
                 <h1 className="text-4xl md:text-5xl font-bold font-display text-gray-900 mb-6">
                   Pick your perfect number.
@@ -188,29 +177,18 @@ export default function GetNumber() {
                 </div>
               </div>
 
-              {/* Explain trial limits */}
+              {/* Instant activation features */}
               <div className="max-w-xl mx-auto bg-white border border-gray-200 rounded-2xl p-6 text-sm text-gray-600 space-y-2">
-                <p className="font-semibold text-gray-800 mb-1">How trial mode works</p>
+                <p className="font-semibold text-gray-800 mb-1">What's included with your number</p>
                 <ul className="list-disc list-inside space-y-1">
-                  <li>This number is already active on your SignalWire account.</li>
-                  <li>You can send & receive SMS immediately after claiming.</li>
-                  <li>
-                    On a <strong>trial account</strong>, outbound SMS can only reach{" "}
-                    <strong>verified phone numbers</strong>. Verify recipient numbers at{" "}
-                    <a
-                      href="https://demuregram.signalwire.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline"
-                    >
-                      demuregram.signalwire.com
-                    </a>
-                    .
-                  </li>
-                  <li>Upgrade your SignalWire account to remove all restrictions.</li>
+                  <li>Instant web messaging portal access</li>
+                  <li>Unlimited Wi-Fi calling & text messaging</li>
+                  <li>High-speed 5G cellular eSIM data add-ons</li>
+                  <li>No annual contracts or hidden carrier fees</li>
                 </ul>
               </div>
             </div>
+
           )}
         </div>
       </div>

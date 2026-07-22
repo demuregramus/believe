@@ -126,26 +126,12 @@ export default function WebMessaging() {
                 </div>
               </div>
               <div className="flex-grow p-6 space-y-3">
-                <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm flex gap-3 items-start border border-blue-100">
-                  <AlertCircle className="w-5 h-5 shrink-0 text-blue-500" />
-                  <p>Welcome to Web Messaging! Enter a recipient number and start typing to send an SMS via your Believe number.</p>
-                </div>
-                <div className="bg-amber-50 text-amber-800 p-4 rounded-xl text-sm flex gap-3 items-start border border-amber-200">
-                  <FlaskConical className="w-5 h-5 shrink-0 text-amber-500" />
-                  <p>
-                    <strong>Trial mode:</strong> Outbound SMS can only reach{" "}
-                    <strong>verified numbers</strong>. Add recipients at{" "}
-                    <a
-                      href="https://demuregram.signalwire.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      demuregram.signalwire.com
-                    </a>.
-                  </p>
+                <div className="bg-primary/5 text-gray-800 p-4 rounded-xl text-sm flex gap-3 items-start border border-primary/10">
+                  <AlertCircle className="w-5 h-5 shrink-0 text-primary" />
+                  <p>Welcome to Web Messaging! Enter a recipient number in the top bar to send and receive text messages via your Believe Wireless line.</p>
                 </div>
               </div>
+
               <div className="p-4 border-t border-gray-200">
                 <Button variant="ghost" className="w-full text-gray-500 hover:text-gray-900" onClick={() => setActiveNumber("")}>
                   Sign Out
