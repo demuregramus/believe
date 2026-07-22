@@ -9,7 +9,6 @@ import * as zod from 'zod';
 
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -18,32 +17,30 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * Search for available phone numbers to claim via SignalWire
  * @summary Search available phone numbers
  */
 export const ListAvailableNumbersQueryParams = zod.object({
-  "areaCode": zod.coerce.string().optional().describe('3-digit US area code to search within'),
-  "contains": zod.coerce.string().optional().describe('Digits the number should contain')
+  "areaCode": zod.coerce.string().optional(),
+  "contains": zod.coerce.string().optional()
 })
 
 export const ListAvailableNumbersResponseItem = zod.object({
-  "phoneNumber": zod.string().describe('E.164 formatted phone number'),
-  "friendlyName": zod.string().describe('Human-readable phone number'),
-  "region": zod.string().describe('US state\/region'),
-  "rateCenter": zod.string().describe('Rate center \/ city'),
-  "monthlyFee": zod.string().describe('Monthly cost (typically \"$0.00\")')
+  "phoneNumber": zod.string(),
+  "friendlyName": zod.string(),
+  "region": zod.string(),
+  "rateCenter": zod.string(),
+  "monthlyFee": zod.string()
 })
 export const ListAvailableNumbersResponse = zod.array(ListAvailableNumbersResponseItem)
 
 
 /**
- * Provision a phone number through SignalWire
  * @summary Claim a phone number
  */
 export const ClaimPhoneNumberBody = zod.object({
-  "phoneNumber": zod.string().describe('E.164 phone number to claim'),
-  "userEmail": zod.string().optional().describe('Email of user claiming the number (optional)'),
-  "userName": zod.string().optional().describe('Name of user claiming the number (optional)')
+  "phoneNumber": zod.string(),
+  "userEmail": zod.string().optional(),
+  "userName": zod.string().optional()
 })
 
 export const ClaimPhoneNumberResponse = zod.object({
@@ -56,28 +53,26 @@ export const ClaimPhoneNumberResponse = zod.object({
 
 
 /**
- * Returns all available Believe Wireless service plans
  * @summary List available service plans
  */
 export const ListPlansResponseItem = zod.object({
   "id": zod.string(),
   "name": zod.string(),
-  "price": zod.string().describe('Monthly price (e.g. \"$0\", \"$9.99\")'),
+  "price": zod.string(),
   "description": zod.string(),
   "features": zod.array(zod.string()),
-  "highlight": zod.boolean().describe('Whether this plan should be visually highlighted'),
-  "badge": zod.string().nullish().describe('Optional badge text (e.g. \"Most Popular\")')
+  "highlight": zod.boolean(),
+  "badge": zod.string().nullish()
 })
 export const ListPlansResponse = zod.array(ListPlansResponseItem)
 
 
 /**
- * Retrieve SMS message history for a phone number
  * @summary Get message history
  */
 export const ListMessagesQueryParams = zod.object({
-  "phoneNumber": zod.coerce.string().describe('The phone number to retrieve messages for'),
-  "limit": zod.coerce.number().optional().describe('Max number of messages to return (default 50)')
+  "phoneNumber": zod.coerce.string(),
+  "limit": zod.coerce.number().optional()
 })
 
 export const ListMessagesResponseItem = zod.object({
@@ -93,13 +88,12 @@ export const ListMessagesResponse = zod.array(ListMessagesResponseItem)
 
 
 /**
- * Send an SMS via SignalWire
  * @summary Send an SMS message
  */
 export const SendMessageBody = zod.object({
-  "from": zod.string().describe('Sender phone number (E.164)'),
-  "to": zod.string().describe('Recipient phone number (E.164)'),
-  "body": zod.string().describe('Message text')
+  "from": zod.string(),
+  "to": zod.string(),
+  "body": zod.string()
 })
 
 export const SendMessageResponse = zod.object({
@@ -114,7 +108,6 @@ export const SendMessageResponse = zod.object({
 
 
 /**
- * Receives incoming SMS from SignalWire and stores them
  * @summary SignalWire inbound message webhook
  */
 export const SignalwireWebhookBody = zod.object({
@@ -128,7 +121,6 @@ export const SignalwireWebhookResponse = zod.unknown()
 
 
 /**
- * Returns aggregate platform statistics for display on the landing page
  * @summary Get platform statistics
  */
 export const GetStatsResponse = zod.object({
@@ -136,6 +128,83 @@ export const GetStatsResponse = zod.object({
   "totalMessagesSent": zod.number(),
   "totalUsers": zod.number(),
   "coverageStates": zod.number()
+})
+
+
+/**
+ * @summary Admin login
+ */
+export const AdminLoginBody = zod.object({
+  "email": zod.string(),
+  "password": zod.string()
+})
+
+export const AdminLoginResponse = zod.object({
+  "email": zod.string(),
+  "loggedIn": zod.boolean()
+})
+
+
+/**
+ * @summary Admin logout
+ */
+export const AdminLogoutResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Get current admin session
+ */
+export const GetAdminMeResponse = zod.object({
+  "email": zod.string(),
+  "loggedIn": zod.boolean()
+})
+
+
+/**
+ * @summary Admin — list all claimed numbers
+ */
+export const AdminListNumbersQueryParams = zod.object({
+  "limit": zod.coerce.number().optional(),
+  "offset": zod.coerce.number().optional()
+})
+
+export const AdminListNumbersResponse = zod.object({
+  "numbers": zod.array(zod.object({
+  "id": zod.number(),
+  "sid": zod.string(),
+  "phoneNumber": zod.string(),
+  "friendlyName": zod.string(),
+  "userEmail": zod.string().nullish(),
+  "userName": zod.string().nullish(),
+  "status": zod.string(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number()
+})
+
+
+/**
+ * @summary Admin — list all messages
+ */
+export const AdminListMessagesQueryParams = zod.object({
+  "limit": zod.coerce.number().optional(),
+  "offset": zod.coerce.number().optional()
+})
+
+export const AdminListMessagesResponse = zod.object({
+  "messages": zod.array(zod.object({
+  "id": zod.number(),
+  "sid": zod.string(),
+  "from": zod.string(),
+  "to": zod.string(),
+  "body": zod.string(),
+  "direction": zod.string(),
+  "status": zod.string(),
+  "createdAt": zod.string()
+})),
+  "total": zod.number()
 })
 
 

@@ -6,8 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface MessageInput {
+export interface AdminMessageItem {
+  id: number;
+  sid: string;
   from: string;
   to: string;
   body: string;
+  direction: string;
+  status: string;
+  createdAt: string;
 }

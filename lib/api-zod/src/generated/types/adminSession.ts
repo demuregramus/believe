@@ -6,7 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ListMessagesParams = {
-phoneNumber: string;
-limit?: number;
-};
+export interface AdminSession {
+  email: string;
+  loggedIn: boolean;
+}

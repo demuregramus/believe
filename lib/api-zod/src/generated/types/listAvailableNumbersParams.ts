@@ -7,12 +7,6 @@
  */
 
 export type ListAvailableNumbersParams = {
-/**
- * 3-digit US area code to search within
- */
 areaCode?: string;
-/**
- * Digits the number should contain
- */
 contains?: string;
 };

@@ -13,25 +13,21 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface SuccessResponse {
+  success: boolean;
+}
+
 export interface AvailablePhoneNumber {
-  /** E.164 formatted phone number */
   phoneNumber: string;
-  /** Human-readable phone number */
   friendlyName: string;
-  /** US state/region */
   region: string;
-  /** Rate center / city */
   rateCenter: string;
-  /** Monthly cost (typically "$0.00") */
   monthlyFee: string;
 }
 
 export interface PhoneNumberClaim {
-  /** E.164 phone number to claim */
   phoneNumber: string;
-  /** Email of user claiming the number (optional) */
   userEmail?: string;
-  /** Name of user claiming the number (optional) */
   userName?: string;
 }
 
@@ -46,16 +42,11 @@ export interface ClaimedPhoneNumber {
 export interface Plan {
   id: string;
   name: string;
-  /** Monthly price (e.g. "$0", "$9.99") */
   price: string;
   description: string;
   features: string[];
-  /** Whether this plan should be visually highlighted */
   highlight: boolean;
-  /**
-     * Optional badge text (e.g. "Most Popular")
-     * @nullable
-     */
+  /** @nullable */
   badge?: string | null;
 }
 
@@ -78,11 +69,8 @@ export interface Message {
 }
 
 export interface MessageInput {
-  /** Sender phone number (E.164) */
   from: string;
-  /** Recipient phone number (E.164) */
   to: string;
-  /** Message text */
   body: string;
 }
 
@@ -100,25 +88,67 @@ export interface Stats {
   coverageStates: number;
 }
 
+export interface AdminCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AdminSession {
+  email: string;
+  loggedIn: boolean;
+}
+
+export interface AdminNumberItem {
+  id: number;
+  sid: string;
+  phoneNumber: string;
+  friendlyName: string;
+  /** @nullable */
+  userEmail?: string | null;
+  /** @nullable */
+  userName?: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export interface AdminNumbersResponse {
+  numbers: AdminNumberItem[];
+  total: number;
+}
+
+export interface AdminMessageItem {
+  id: number;
+  sid: string;
+  from: string;
+  to: string;
+  body: string;
+  direction: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface AdminMessagesResponse {
+  messages: AdminMessageItem[];
+  total: number;
+}
+
 export type ListAvailableNumbersParams = {
-/**
- * 3-digit US area code to search within
- */
 areaCode?: string;
-/**
- * Digits the number should contain
- */
 contains?: string;
 };
 
 export type ListMessagesParams = {
-/**
- * The phone number to retrieve messages for
- */
 phoneNumber: string;
-/**
- * Max number of messages to return (default 50)
- */
 limit?: number;
+};
+
+export type AdminListNumbersParams = {
+limit?: number;
+offset?: number;
+};
+
+export type AdminListMessagesParams = {
+limit?: number;
+offset?: number;
 };
 

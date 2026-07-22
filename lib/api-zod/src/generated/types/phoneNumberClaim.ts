@@ -7,10 +7,7 @@
  */
 
 export interface PhoneNumberClaim {
-  /** E.164 phone number to claim */
   phoneNumber: string;
-  /** Email of user claiming the number (optional) */
   userEmail?: string;
-  /** Name of user claiming the number (optional) */
   userName?: string;
 }

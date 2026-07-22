@@ -9,8 +9,18 @@ import GetNumber from '@/pages/GetNumber';
 import Plans from '@/pages/Plans';
 import Coverage from '@/pages/Coverage';
 import WebMessaging from '@/pages/WebMessaging';
+import AdminLogin from '@/pages/admin/AdminLogin';
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminNumbers from '@/pages/admin/AdminNumbers';
+import AdminMessages from '@/pages/admin/AdminMessages';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 function Router() {
   return (
@@ -20,6 +30,10 @@ function Router() {
       <Route path="/plans" component={Plans} />
       <Route path="/coverage" component={Coverage} />
       <Route path="/web-messaging" component={WebMessaging} />
+      <Route path="/admin" component={AdminLogin} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/numbers" component={AdminNumbers} />
+      <Route path="/admin/messages" component={AdminMessages} />
       <Route component={NotFound} />
     </Switch>
   );

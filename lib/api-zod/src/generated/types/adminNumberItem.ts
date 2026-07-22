@@ -6,10 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface AvailablePhoneNumber {
+export interface AdminNumberItem {
+  id: number;
+  sid: string;
   phoneNumber: string;
   friendlyName: string;
-  region: string;
-  rateCenter: string;
-  monthlyFee: string;
+  /** @nullable */
+  userEmail?: string | null;
+  /** @nullable */
+  userName?: string | null;
+  status: string;
+  createdAt: string;
 }

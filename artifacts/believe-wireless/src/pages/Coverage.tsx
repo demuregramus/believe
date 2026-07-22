@@ -28,7 +28,7 @@ export default function Coverage() {
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-10">
             Powered by the nation's largest 5G network. When you're away from WiFi, Believe has you covered coast to coast.
           </p>
-          <Button asChild size="xl" className="rounded-full font-bold px-10 h-14 bg-primary text-white hover:bg-primary/90">
+          <Button asChild size="lg" className="rounded-full font-bold px-10 h-14 bg-primary text-white hover:bg-primary/90">
             <Link href="/get-free-number">Get Connected Now</Link>
           </Button>
         </div>

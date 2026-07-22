@@ -5,8 +5,9 @@
  * Believe Wireless API — powered by SignalWire
  * OpenAPI spec version: 0.1.0
  */
+import type { AdminNumberItem } from './adminNumberItem';
 
-export type ListMessagesParams = {
-phoneNumber: string;
-limit?: number;
-};
+export interface AdminNumbersResponse {
+  numbers: AdminNumberItem[];
+  total: number;
+}

@@ -9,15 +9,10 @@
 export interface Plan {
   id: string;
   name: string;
-  /** Monthly price (e.g. "$0", "$9.99") */
   price: string;
   description: string;
   features: string[];
-  /** Whether this plan should be visually highlighted */
   highlight: boolean;
-  /**
-     * Optional badge text (e.g. "Most Popular")
-     * @nullable
-     */
+  /** @nullable */
   badge?: string | null;
 }

@@ -35,10 +35,10 @@ export default function Home() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild size="xl" className="rounded-full text-lg font-bold px-8 h-14 w-full sm:w-auto shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
+                <Button asChild size="lg" className="rounded-full text-lg font-bold px-8 h-14 w-full sm:w-auto shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
                   <Link href="/get-free-number">Get Your Free Number</Link>
                 </Button>
-                <Button asChild variant="outline" size="xl" className="rounded-full text-lg font-bold px-8 h-14 w-full sm:w-auto hover:bg-gray-50 border-gray-200">
+                <Button asChild variant="outline" size="lg" className="rounded-full text-lg font-bold px-8 h-14 w-full sm:w-auto hover:bg-gray-50 border-gray-200">
                   <Link href="/plans">View Plans</Link>
                 </Button>
               </div>
@@ -248,7 +248,7 @@ export default function Home() {
           <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
             Get your free number today and join the millions who have stopped paying for essential communication.
           </p>
-          <Button asChild size="xl" className="rounded-full text-lg font-bold px-10 h-16 bg-primary hover:bg-primary/90 text-white shadow-2xl shadow-primary/30 hover:scale-105 transition-transform">
+          <Button asChild size="lg" className="rounded-full text-lg font-bold px-10 h-16 bg-primary hover:bg-primary/90 text-white shadow-2xl shadow-primary/30 hover:scale-105 transition-transform">
             <Link href="/get-free-number">Claim Your Free Number Now</Link>
           </Button>
         </div>

@@ -5,6 +5,7 @@ import plansRouter from "./plans";
 import messagesRouter from "./messages";
 import statsRouter from "./stats";
 import webhooksRouter from "./webhooks";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(plansRouter);
 router.use(messagesRouter);
 router.use(statsRouter);
 router.use(webhooksRouter);
+router.use(adminRouter);
 
 export default router;
