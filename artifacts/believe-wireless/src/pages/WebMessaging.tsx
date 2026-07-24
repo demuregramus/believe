@@ -142,9 +142,38 @@ export default function WebMessaging() {
     }
   }, [messages]);
 
+  // Zero-Delay SSE Real-Time Event Stream Listener
+  useEffect(() => {
+    if (!activeNumber) return;
+
+    const eventSource = new EventSource("/api/stream");
+
+    eventSource.onmessage = (event) => {
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.type === "message") {
+          refetchMessages();
+        } else if (payload.type === "call") {
+          setCallLogs((prev) => [payload.data, ...prev.filter((c) => c.id !== payload.data.id)]);
+        } else if (payload.type === "voicemail") {
+          setVoicemails((prev) => [payload.data, ...prev.filter((v) => v.id !== payload.data.id)]);
+        } else if (payload.type === "contact") {
+          setContacts((prev) => [payload.data, ...prev.filter((c) => c.id !== payload.data.id)]);
+        }
+      } catch {
+        // Ignore parse error
+      }
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [activeNumber, refetchMessages]);
+
   // Fetch Call History, Voicemail & Contacts
   useEffect(() => {
     if (!activeNumber) return;
+
 
     fetch(`/api/calls/history?phoneNumber=${encodeURIComponent(activeNumber)}`)
       .then((r) => r.json())

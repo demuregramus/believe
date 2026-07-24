@@ -1,4 +1,7 @@
 import { Router, type IRouter } from "express";
+import { db, contactsTable } from "@workspace/db";
+import { eq, desc } from "drizzle-orm";
+import { broadcastSseEvent } from "./events";
 
 const router: IRouter = Router();
 
@@ -43,12 +46,32 @@ const memoryContactsStore: ContactRecord[] = [
 ];
 
 // GET /contacts
-router.get("/contacts", (_req, res): void => {
+router.get("/contacts", async (_req, res): Promise<void> => {
+  try {
+    const rows = await db.select().from(contactsTable).orderBy(desc(contactsTable.createdAt));
+    if (rows.length > 0) {
+      res.json(
+        rows.map((c) => ({
+          id: String(c.id),
+          name: c.name,
+          phoneNumber: c.phoneNumber,
+          email: c.email || undefined,
+          notes: c.notes || undefined,
+          avatarColor: c.avatarColor,
+          createdAt: c.createdAt.toISOString(),
+        }))
+      );
+      return;
+    }
+  } catch {
+    // Fallback to memory
+  }
+
   res.json(memoryContactsStore);
 });
 
 // POST /contacts — create or update contact
-router.post("/contacts", (req, res): void => {
+router.post("/contacts", async (req, res): Promise<void> => {
   const { name, phoneNumber, email, notes } = req.body as {
     name: string;
     phoneNumber: string;
@@ -74,13 +97,47 @@ router.post("/contacts", (req, res): void => {
     createdAt: new Date().toISOString(),
   };
 
+  try {
+    const [saved] = await db
+      .insert(contactsTable)
+      .values({
+        name: newContact.name,
+        phoneNumber: newContact.phoneNumber,
+        email: newContact.email,
+        notes: newContact.notes,
+        avatarColor: newContact.avatarColor,
+      })
+      .returning();
+
+    if (saved) {
+      newContact.id = String(saved.id);
+      newContact.createdAt = saved.createdAt.toISOString();
+    }
+  } catch {
+    // Ignore DB error
+  }
+
   memoryContactsStore.unshift(newContact);
+
+  // Broadcast zero-delay event
+  broadcastSseEvent("contact", newContact);
+
   res.status(201).json(newContact);
 });
 
 // DELETE /contacts/:id
-router.delete("/contacts/:id", (req, res): void => {
-  const idx = memoryContactsStore.findIndex((c) => c.id === req.params.id);
+router.delete("/contacts/:id", async (req, res): Promise<void> => {
+  const id = req.params.id;
+  try {
+    const numericId = Number(id);
+    if (!isNaN(numericId)) {
+      await db.delete(contactsTable).where(eq(contactsTable.id, numericId));
+    }
+  } catch {
+    // Ignore DB error
+  }
+
+  const idx = memoryContactsStore.findIndex((c) => c.id === id);
   if (idx !== -1) {
     memoryContactsStore.splice(idx, 1);
   }

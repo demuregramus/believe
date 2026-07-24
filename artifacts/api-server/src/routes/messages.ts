@@ -3,14 +3,11 @@ import { db } from "@workspace/db";
 import { messagesTable } from "@workspace/db";
 import { eq, or, desc } from "drizzle-orm";
 import { sendSms } from "../lib/signalwire";
-import {
-  ListMessagesQueryParams,
-  SendMessageBody,
-} from "@workspace/api-zod";
+import { ListMessagesQueryParams } from "@workspace/api-zod";
+import { broadcastSseEvent } from "./events";
 
 const router: IRouter = Router();
 
-// In-memory fallback message store for offline / dev database mode
 export interface MemoryMessage {
   id: string;
   from: string;
@@ -165,6 +162,10 @@ router.post("/messages", async (req, res): Promise<void> => {
   }
 
   memoryMessagesStore.unshift(newMsg);
+
+  // Broadcast zero-delay event to all connected clients
+  broadcastSseEvent("message", newMsg);
+
   res.status(201).json(newMsg);
 });
 

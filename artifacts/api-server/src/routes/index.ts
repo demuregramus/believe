@@ -11,6 +11,7 @@ import callsRouter from "./calls";
 import voicemailRouter from "./voicemail";
 import contactsRouter from "./contacts";
 import numberLockRouter from "./number-lock";
+import eventsRouter from "./events";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(callsRouter);
 router.use(voicemailRouter);
 router.use(contactsRouter);
 router.use(numberLockRouter);
+router.use(eventsRouter);
 
 export default router;
