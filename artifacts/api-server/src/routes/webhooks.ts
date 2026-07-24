@@ -72,6 +72,7 @@ const handleInboundSmsWebhook = async (req: any, res: any): Promise<void> => {
 
 // Carrier Real-Time SMS Delivery Status Callback Handler
 const handleSmsStatusCallback = async (req: any, res: any): Promise<void> => {
+  const correlationId = String(req.query?.correlationId || req.headers["x-correlation-id"] || "");
   const { MessageSid, MessageStatus, SmsStatus } = req.body as {
     MessageSid?: string;
     MessageStatus?: string;
@@ -81,7 +82,7 @@ const handleSmsStatusCallback = async (req: any, res: any): Promise<void> => {
   const status = MessageStatus || SmsStatus || "delivered";
   const sid = MessageSid || "";
 
-  req.log.info({ event: "SMS_STATUS_CALLBACK", messageSid: sid, status }, "[✓] Carrier SMS status callback received");
+  req.log.info({ event: "SMS_STATUS_CALLBACK", correlationId, messageSid: sid, status }, "[✓] Carrier SMS status callback received with correlationId");
 
   if (sid) {
     try {
@@ -94,6 +95,7 @@ const handleSmsStatusCallback = async (req: any, res: any): Promise<void> => {
   res.set("Content-Type", "text/xml");
   res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
 };
+
 
 // Inbound SignalWire Voice Call Webhook Handler
 const handleInboundVoiceWebhook = async (req: any, res: any): Promise<void> => {
@@ -155,6 +157,7 @@ const handleInboundVoiceWebhook = async (req: any, res: any): Promise<void> => {
 
 // Carrier Real-Time Voice Call Status Callback Handler
 const handleVoiceStatusCallback = async (req: any, res: any): Promise<void> => {
+  const correlationId = String(req.query?.correlationId || req.headers["x-correlation-id"] || "");
   const { CallSid, CallStatus, CallDuration } = req.body as {
     CallSid?: string;
     CallStatus?: string;
@@ -165,11 +168,12 @@ const handleVoiceStatusCallback = async (req: any, res: any): Promise<void> => {
   const sid = CallSid || "";
   const durationSeconds = CallDuration ? Number(CallDuration) : 0;
 
-  req.log.info({ event: "VOICE_STATUS_CALLBACK", callSid: sid, status, durationSeconds }, "[✓] Carrier Voice Call status callback received");
+  req.log.info({ event: "VOICE_STATUS_CALLBACK", correlationId, callSid: sid, status, durationSeconds }, "[✓] Carrier Voice Call status callback received with correlationId");
 
   res.set("Content-Type", "text/xml");
   res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
 };
+
 
 // Inbound Voicemail Callback Handler
 const handleInboundVoicemailWebhook = async (req: any, res: any): Promise<void> => {

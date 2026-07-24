@@ -5,6 +5,7 @@ import { z } from "zod/v4";
 export const messagesTable = pgTable("messages", {
   id: serial("id").primaryKey(),
   sid: text("sid").notNull().unique(),
+  correlationId: text("correlation_id"),
   fromNumber: text("from_number").notNull(),
   toNumber: text("to_number").notNull(),
   body: text("body").notNull(),

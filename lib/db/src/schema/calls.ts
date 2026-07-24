@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 
 export const callsTable = pgTable("calls", {
   id: serial("id").primaryKey(),
+  correlationId: text("correlation_id"),
   fromNumber: text("from_number").notNull(),
   toNumber: text("to_number").notNull(),
   direction: text("direction").notNull().default("outgoing"),

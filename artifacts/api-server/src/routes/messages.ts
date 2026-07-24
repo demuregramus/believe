@@ -93,16 +93,19 @@ router.post("/messages", async (req, res): Promise<void> => {
   recentTimestamps.push(now);
   messageVelocityMap.set(from, recentTimestamps);
 
+  const correlationId = (req.headers["x-correlation-id"] as string) || `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  res.setHeader("x-correlation-id", correlationId);
+
   let sent;
   try {
     sent = await sendSms({
       from,
       to,
       body: body || (mediaUrl ? "[MMS Image]" : ""),
-      statusCallback: `${getPublicBaseUrl()}/api/webhooks/sms/status`,
+      statusCallback: `${getPublicBaseUrl()}/api/webhooks/sms/status?correlationId=${correlationId}`,
     });
   } catch (err) {
-    req.log.warn({ err }, "SignalWire carrier SMS dispatch fallback");
+    req.log.warn({ err, correlationId }, "SignalWire carrier SMS dispatch fallback");
     sent = {
       sid: `SIM_${Date.now()}`,
       from,
@@ -111,7 +114,6 @@ router.post("/messages", async (req, res): Promise<void> => {
       status: "queued",
     };
   }
-
 
   const newMsg: MessageRecord = {
     id: String(Date.now()),
@@ -129,6 +131,7 @@ router.post("/messages", async (req, res): Promise<void> => {
       .insert(messagesTable)
       .values({
         sid: sent.sid,
+        correlationId,
         fromNumber: newMsg.from,
         toNumber: newMsg.to,
         body: newMsg.body,
@@ -142,19 +145,21 @@ router.post("/messages", async (req, res): Promise<void> => {
       newMsg.createdAt = saved.createdAt.toISOString();
     }
   } catch (err) {
-    req.log.warn({ err }, "DB insertion warning for message");
+    req.log.warn({ err, correlationId }, "DB insertion warning for message");
   }
 
-  // Structured Telecom Audit Event
+  // Structured Telecom Audit Event with Correlation ID
   req.log.info({
     event: "SMS_SENT",
+    correlationId,
     messageId: newMsg.id,
     from: newMsg.from,
     to: newMsg.to,
     hasMedia: !!newMsg.mediaUrl,
     ip: req.ip,
     timestamp: new Date().toISOString(),
-  });
+  }, "[✓] Outbound SMS requested and sent with correlationId");
+
 
   // Broadcast zero-delay SSE real-time event to all connected clients
   broadcastSseEvent("message", newMsg);

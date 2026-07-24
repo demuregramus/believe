@@ -91,19 +91,21 @@ router.post("/calls/dial", async (req, res): Promise<void> => {
 
   const callerNumber = from || "+18634738499";
 
+  const correlationId = (req.headers["x-correlation-id"] as string) || `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  res.setHeader("x-correlation-id", correlationId);
+
   let carrierCallSid = `call_${Date.now()}`;
   try {
     const carrierCall = await createCall({
       from: callerNumber,
       to,
-      statusCallback: `${getPublicBaseUrl()}/api/webhooks/voice/status`,
+      statusCallback: `${getPublicBaseUrl()}/api/webhooks/voice/status?correlationId=${correlationId}`,
     });
     carrierCallSid = carrierCall.sid;
-    req.log.info({ carrierCallSid, to }, "[✓] SignalWire PSTN call initiated successfully");
+    req.log.info({ carrierCallSid, to, correlationId }, "[✓] SignalWire PSTN call initiated successfully with correlationId");
   } catch (err) {
-    req.log.warn({ err }, "SignalWire carrier call dispatch fallback");
+    req.log.warn({ err, correlationId }, "SignalWire carrier call dispatch fallback");
   }
-
 
   const newCall: CallRecord = {
     id: carrierCallSid,
@@ -119,6 +121,7 @@ router.post("/calls/dial", async (req, res): Promise<void> => {
     const [saved] = await db
       .insert(callsTable)
       .values({
+        correlationId,
         fromNumber: newCall.from,
         toNumber: newCall.to,
         direction: newCall.direction,
@@ -132,12 +135,13 @@ router.post("/calls/dial", async (req, res): Promise<void> => {
       newCall.createdAt = saved.createdAt.toISOString();
     }
   } catch (err) {
-    req.log.warn({ err }, "DB insertion warning for call");
+    req.log.warn({ err, correlationId }, "DB insertion warning for call");
   }
 
-  // Structured Telecom Audit Events
+  // Structured Telecom Audit Events with Correlation ID
   req.log.info({
     event: "CALL_STARTED",
+    correlationId,
     callSid: newCall.id,
     from: newCall.from,
     to: newCall.to,
@@ -145,6 +149,7 @@ router.post("/calls/dial", async (req, res): Promise<void> => {
     ip: req.ip,
     timestamp: new Date().toISOString(),
   });
+
 
   req.log.info({
     event: "CALL_ENDED",
