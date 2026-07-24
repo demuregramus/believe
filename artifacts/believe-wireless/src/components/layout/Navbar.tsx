@@ -13,8 +13,9 @@ export function Navbar() {
     { href: "/plans", label: "Plans" },
     { href: "/esim", label: "eSIM Activation" },
     { href: "/coverage", label: "Coverage" },
-    { href: "/web-messaging", label: "Web Messaging" },
+    { href: "/web-messaging", label: "Web Hub (Text & Voice)" },
   ];
+
 
 
   return (

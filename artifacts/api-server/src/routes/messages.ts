@@ -11,17 +11,48 @@ import {
 const router: IRouter = Router();
 
 // In-memory fallback message store for offline / dev database mode
-interface MemoryMessage {
+export interface MemoryMessage {
   id: string;
   from: string;
   to: string;
   body: string;
+  mediaUrl?: string;
   direction: "inbound" | "outbound-api";
   status: string;
   createdAt: string;
 }
 
-const memoryMessagesStore: MemoryMessage[] = [];
+const memoryMessagesStore: MemoryMessage[] = [
+  {
+    id: "msg_seed_1",
+    from: "+18634738499",
+    to: "+14155552671",
+    body: "Welcome to Believe Wireless! Your line is active with unlimited talk, text, and web messaging.",
+    mediaUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&auto=format&fit=crop&q=80",
+    direction: "outbound-api",
+    status: "delivered",
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: "msg_seed_2",
+    from: "+14155552671",
+    to: "+18634738499",
+    body: "Thanks! Can I send pictures and videos through Web Messaging?",
+    direction: "inbound",
+    status: "received",
+    createdAt: new Date(Date.now() - 1800000).toISOString(),
+  },
+  {
+    id: "msg_seed_3",
+    from: "+18634738499",
+    to: "+14155552671",
+    body: "Yes! Believe Wireless supports high-speed MMS photos, GIFs, and emojis.",
+    mediaUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80",
+    direction: "outbound-api",
+    status: "delivered",
+    createdAt: new Date(Date.now() - 600000).toISOString(),
+  },
+];
 
 router.get("/messages", async (req, res): Promise<void> => {
   const parsed = ListMessagesQueryParams.safeParse(req.query);
@@ -50,10 +81,19 @@ router.get("/messages", async (req, res): Promise<void> => {
       from: m.fromNumber,
       to: m.toNumber,
       body: m.body,
+      mediaUrl: (m as any).mediaUrl ?? undefined,
       direction: m.direction as "inbound" | "outbound-api",
       status: m.status,
       createdAt: m.createdAt.toISOString(),
     }));
+
+    if (response.length === 0) {
+      const filtered = memoryMessagesStore
+        .filter((m) => m.from === phoneNumber || m.to === phoneNumber)
+        .slice(0, limit ?? 50);
+      res.json(filtered);
+      return;
+    }
 
     res.json(response);
   } catch (err) {
@@ -66,24 +106,28 @@ router.get("/messages", async (req, res): Promise<void> => {
 });
 
 router.post("/messages", async (req, res): Promise<void> => {
-  const parsed = SendMessageBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
+  const { from, to, body, mediaUrl } = req.body as {
+    from: string;
+    to: string;
+    body: string;
+    mediaUrl?: string;
+  };
+
+  if (!from || !to || (!body && !mediaUrl)) {
+    res.status(400).json({ error: "Missing required message parameters (from, to, body/mediaUrl)" });
     return;
   }
 
-  const { from, to, body } = parsed.data;
-
   let sent;
   try {
-    sent = await sendSms({ from, to, body });
+    sent = await sendSms({ from, to, body: body || (mediaUrl ? "[MMS Image]" : "") });
   } catch (err) {
     req.log.warn({ err }, "SignalWire SMS call failed, recording simulated message for testing");
     sent = {
       sid: `SIM_${Date.now()}`,
       from,
       to,
-      body,
+      body: body || (mediaUrl ? "[MMS Image]" : ""),
       status: "queued",
     };
   }
@@ -92,7 +136,8 @@ router.post("/messages", async (req, res): Promise<void> => {
     id: String(Date.now()),
     from: sent.from ?? from,
     to: sent.to ?? to,
-    body: sent.body ?? body,
+    body: body || "",
+    mediaUrl: mediaUrl || undefined,
     direction: "outbound-api",
     status: sent.status ?? "sent",
     createdAt: new Date().toISOString(),

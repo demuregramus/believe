@@ -7,6 +7,10 @@ import statsRouter from "./stats";
 import webhooksRouter from "./webhooks";
 import adminRouter from "./admin";
 import esimRouter from "./esim";
+import callsRouter from "./calls";
+import voicemailRouter from "./voicemail";
+import contactsRouter from "./contacts";
+import numberLockRouter from "./number-lock";
 
 const router: IRouter = Router();
 
@@ -18,6 +22,9 @@ router.use(statsRouter);
 router.use(webhooksRouter);
 router.use(adminRouter);
 router.use(esimRouter);
+router.use(callsRouter);
+router.use(voicemailRouter);
+router.use(contactsRouter);
+router.use(numberLockRouter);
 
 export default router;
-
