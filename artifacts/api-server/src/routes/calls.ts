@@ -149,4 +149,24 @@ router.post("/calls/dial", async (req, res): Promise<void> => {
   res.status(201).json(newCall);
 });
 
+// Softphone In-Call Control Endpoints
+router.post("/calls/hold", (req, res): void => {
+  const { onHold } = req.body as { onHold: boolean };
+  res.json({ success: true, onHold });
+});
+
+router.post("/calls/record", (req, res): void => {
+  const { isRecording } = req.body as { isRecording: boolean };
+  res.json({ success: true, isRecording });
+});
+
+router.post("/calls/transfer", (req, res): void => {
+  const { targetNumber } = req.body as { targetNumber: string };
+  res.json({ success: true, transferredTo: targetNumber });
+});
+
+router.post("/calls/merge", (_req, res): void => {
+  res.json({ success: true, merged: true });
+});
+
 export default router;

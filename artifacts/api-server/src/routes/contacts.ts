@@ -11,6 +11,7 @@ export interface ContactRecord {
   phoneNumber: string;
   email?: string;
   notes?: string;
+  favorite?: boolean;
   avatarColor: string;
   createdAt: string;
 }
@@ -22,6 +23,7 @@ const memoryContactsStore: ContactRecord[] = [
     phoneNumber: "+14155552671",
     email: "alex.rivera@example.com",
     notes: "Design Partner",
+    favorite: true,
     avatarColor: "bg-blue-500",
     createdAt: new Date().toISOString(),
   },
@@ -31,6 +33,7 @@ const memoryContactsStore: ContactRecord[] = [
     phoneNumber: "+13125550198",
     email: "sarah.c@example.com",
     notes: "Believe Wireless VIP",
+    favorite: false,
     avatarColor: "bg-emerald-500",
     createdAt: new Date().toISOString(),
   },
@@ -40,6 +43,7 @@ const memoryContactsStore: ContactRecord[] = [
     phoneNumber: "+12125558839",
     email: "jtaylor@example.com",
     notes: "Business Line",
+    favorite: false,
     avatarColor: "bg-purple-500",
     createdAt: new Date().toISOString(),
   },
@@ -57,6 +61,7 @@ router.get("/contacts", async (_req, res): Promise<void> => {
           phoneNumber: c.phoneNumber,
           email: c.email || undefined,
           notes: c.notes || undefined,
+          favorite: (c as any).favorite ?? false,
           avatarColor: c.avatarColor,
           createdAt: c.createdAt.toISOString(),
         }))
@@ -72,11 +77,12 @@ router.get("/contacts", async (_req, res): Promise<void> => {
 
 // POST /contacts — create or update contact
 router.post("/contacts", async (req, res): Promise<void> => {
-  const { name, phoneNumber, email, notes } = req.body as {
+  const { name, phoneNumber, email, notes, favorite } = req.body as {
     name: string;
     phoneNumber: string;
     email?: string;
     notes?: string;
+    favorite?: boolean;
   };
 
   if (!name || !phoneNumber) {
@@ -93,6 +99,7 @@ router.post("/contacts", async (req, res): Promise<void> => {
     phoneNumber,
     email: email || undefined,
     notes: notes || undefined,
+    favorite: favorite ?? false,
     avatarColor: randomColor,
     createdAt: new Date().toISOString(),
   };
@@ -123,6 +130,16 @@ router.post("/contacts", async (req, res): Promise<void> => {
   broadcastSseEvent("contact", newContact);
 
   res.status(201).json(newContact);
+});
+
+// POST /contacts/:id/favorite — toggle favorite star status
+router.post("/contacts/:id/favorite", (req, res): void => {
+  const id = req.params.id;
+  const item = memoryContactsStore.find((c) => c.id === id);
+  if (item) {
+    item.favorite = !item.favorite;
+  }
+  res.json({ success: true, item });
 });
 
 // DELETE /contacts/:id

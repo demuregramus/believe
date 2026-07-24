@@ -14,8 +14,11 @@ let memoryNumberLockState = {
   verified2FA: true,
   e911Status: "Registered",
   e911Address: "100 Believe Plaza, Princeton, NJ 08540",
+  callerIdMode: "Believe Wireless",
   lastActive: new Date().toISOString(),
 };
+
+const memoryBlockedNumbers: string[] = ["+18005550199", "+18885550122"];
 
 // GET /number-lock
 router.get("/number-lock", async (_req, res): Promise<void> => {
@@ -37,6 +40,7 @@ router.get("/number-lock", async (_req, res): Promise<void> => {
         verified2FA: true,
         e911Status: "Registered",
         e911Address: row.e911Address,
+        callerIdMode: memoryNumberLockState.callerIdMode,
         lastActive: row.updatedAt.toISOString(),
       });
       return;
@@ -50,16 +54,26 @@ router.get("/number-lock", async (_req, res): Promise<void> => {
 
 // POST /number-lock/toggle
 router.post("/number-lock/toggle", async (req, res): Promise<void> => {
-  const { isLocked, e911Address } = req.body as { isLocked?: boolean; e911Address?: string };
+  const { isLocked, e911Address, callerIdMode } = req.body as {
+    isLocked?: boolean;
+    e911Address?: string;
+    callerIdMode?: string;
+  };
 
   if (typeof isLocked === "boolean") {
     memoryNumberLockState.isLocked = isLocked;
+  } else if (isLocked === undefined) {
+    // Keep current
   } else {
     memoryNumberLockState.isLocked = !memoryNumberLockState.isLocked;
   }
 
   if (e911Address) {
     memoryNumberLockState.e911Address = e911Address;
+  }
+
+  if (callerIdMode) {
+    memoryNumberLockState.callerIdMode = callerIdMode;
   }
 
   try {
@@ -86,5 +100,36 @@ router.post("/number-lock/toggle", async (req, res): Promise<void> => {
 
   res.json(memoryNumberLockState);
 });
+
+const handleGetBlockedNumbers = (_req: any, res: any): void => {
+  res.json(memoryBlockedNumbers);
+};
+
+const handlePostBlockedNumbers = (req: any, res: any): void => {
+  const { phoneNumber, block } = req.body as { phoneNumber: string; block?: boolean };
+  if (!phoneNumber) {
+    res.status(400).json({ error: "Phone number is required" });
+    return;
+  }
+
+  const idx = memoryBlockedNumbers.indexOf(phoneNumber);
+  const shouldBlock = block ?? idx === -1;
+
+  if (shouldBlock && idx === -1) {
+    memoryBlockedNumbers.push(phoneNumber);
+  } else if (!shouldBlock && idx !== -1) {
+    memoryBlockedNumbers.splice(idx, 1);
+  }
+
+  res.json({ success: true, blockedNumbers: memoryBlockedNumbers });
+};
+
+// GET /api/blocked-numbers and /api/number-lock/blocked-numbers
+router.get("/blocked-numbers", handleGetBlockedNumbers);
+router.get("/number-lock/blocked-numbers", handleGetBlockedNumbers);
+
+// POST /api/blocked-numbers and /api/number-lock/blocked-numbers
+router.post("/blocked-numbers", handlePostBlockedNumbers);
+router.post("/number-lock/blocked-numbers", handlePostBlockedNumbers);
 
 export default router;

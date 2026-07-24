@@ -149,4 +149,23 @@ router.post("/voicemail/:id/read", async (req, res): Promise<void> => {
   res.json({ success: true, item });
 });
 
+// DELETE /voicemail/:id — delete voicemail
+router.delete("/voicemail/:id", async (req, res): Promise<void> => {
+  const id = req.params.id;
+  try {
+    const numericId = Number(id);
+    if (!isNaN(numericId)) {
+      await db.delete(voicemailsTable).where(eq(voicemailsTable.id, numericId));
+    }
+  } catch {
+    // Ignore DB error
+  }
+
+  const idx = memoryVoicemailStore.findIndex((v) => v.id === id);
+  if (idx !== -1) {
+    memoryVoicemailStore.splice(idx, 1);
+  }
+  res.json({ success: true });
+});
+
 export default router;

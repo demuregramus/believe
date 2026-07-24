@@ -32,4 +32,23 @@ router.get("/stats", async (req, res): Promise<void> => {
   }
 });
 
+const handleUsageStats = (_req: any, res: any): void => {
+  res.json({
+    textsToday: 48,
+    callsToday: 6,
+    minutesToday: 132,
+    voicemailCount: 2,
+    storagePercentage: 78,
+    planName: "Believe Unlimited 5G",
+    planCost: "$0.00 / Included",
+    unlimitedText: true,
+    unlimitedCalling: true,
+    spamProtection: true,
+  });
+};
+
+// GET /api/stats/usage and GET /api/usage
+router.get("/stats/usage", handleUsageStats);
+router.get("/usage", handleUsageStats);
+
 export default router;
