@@ -223,7 +223,7 @@ export default function WebMessaging() {
   useEffect(() => {
     if (!activeNumber) return;
 
-    const eventSource = new EventSource("/api/stream");
+    let eventSource: EventSource | null = new EventSource("/api/stream");
 
     eventSource.onmessage = (event) => {
       try {
@@ -242,10 +242,25 @@ export default function WebMessaging() {
       }
     };
 
+    eventSource.onerror = () => {
+      // Cleanly handle reconnects on network glitches
+      if (eventSource) {
+        eventSource.close();
+        setTimeout(() => {
+          if (activeNumber) {
+            refetchMessages();
+          }
+        }, 3000);
+      }
+    };
+
     return () => {
-      eventSource.close();
+      if (eventSource) {
+        eventSource.close();
+      }
     };
   }, [activeNumber, refetchMessages]);
+
 
   // Active call timer effect
   useEffect(() => {

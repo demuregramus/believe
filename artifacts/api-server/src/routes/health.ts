@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { sql } from "drizzle-orm";
+import { getActiveSseClientCount } from "./events";
 
 const router: IRouter = Router();
 
@@ -25,11 +26,18 @@ const handleHealthCheck = async (_req: any, res: any): Promise<void> => {
     database: {
       connected: dbConnected,
       pingMs: dbPingMs,
+      persistenceMode: "PostgreSQL Drizzle ORM",
     },
     signalwireCarrier: {
       status: "connected",
       spaceUrl: process.env.SIGNALWIRE_SPACE_URL || "demuregram.signalwire.com",
       trialNumber: "+18634738499",
+      webrtcIceServers: ["stun:stun.l.google.com:19302", "stun:turn.signalwire.com:3478"],
+    },
+    realtimeEvents: {
+      activeSseConnections: getActiveSseClientCount(),
+      protocol: "Server-Sent Events (SSE) / EventSource",
+      keepAliveHeartbeatSec: 15,
     },
     system: {
       nodeVersion: process.version,
