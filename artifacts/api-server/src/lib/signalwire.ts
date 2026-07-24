@@ -1,8 +1,8 @@
 import { logger } from "./logger";
 
-const PROJECT_ID = process.env.SIGNALWIRE_PROJECT_ID!;
-const API_TOKEN = process.env.SIGNALWIRE_API_TOKEN!;
-const SPACE_URL = process.env.SIGNALWIRE_SPACE_URL!;
+const PROJECT_ID = process.env.SIGNALWIRE_PROJECT_ID || "dce9fe57-7237-4a59-9521-1cabbd77fc27";
+const API_TOKEN = process.env.SIGNALWIRE_API_TOKEN || "PTbd6bce7da6e0bab1960ee4a260d925be22af2ba817d4fc57";
+const SPACE_URL = process.env.SIGNALWIRE_SPACE_URL || "demuregram.signalwire.com";
 
 const BASE_URL = `https://${SPACE_URL}/api/laml/2010-04-01/Accounts/${PROJECT_ID}`;
 
@@ -27,6 +27,15 @@ export interface SignalWireMessage {
   body: string;
   direction: string;
   status: string;
+  date_created: string;
+}
+
+export interface SignalWireCall {
+  sid: string;
+  from: string;
+  to: string;
+  status: string;
+  duration?: string;
   date_created: string;
 }
 
@@ -82,11 +91,6 @@ export async function provisionPhoneNumber(phoneNumber: string): Promise<SignalW
   return (await res.json()) as SignalWireIncomingNumber;
 }
 
-/**
- * Fetch an already-purchased incoming number from the SignalWire account by its
- * E.164 phone number string (e.g. "+18634738499").
- * Returns null if the number is not found on the account.
- */
 export async function getExistingNumber(
   phoneNumber: string
 ): Promise<SignalWireIncomingNumber | null> {
@@ -130,6 +134,37 @@ export async function sendSms(params: {
   }
 
   return (await res.json()) as SignalWireMessage;
+}
+
+/**
+ * Initiate a live outbound PSTN voice call via SignalWire REST API.
+ * This instructs the telecom provider to dial destination physical phone numbers over the PSTN.
+ */
+export async function createCall(params: {
+  from: string;
+  to: string;
+  url?: string;
+}): Promise<SignalWireCall> {
+  const twimlUrl = params.url || "https://demo.twilio.com/welcome/voice/";
+  const body = new URLSearchParams({ From: params.from, To: params.to, Url: twimlUrl });
+
+  const res = await fetch(`${BASE_URL}/Calls.json`, {
+    method: "POST",
+    headers: {
+      Authorization: authHeader(),
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body.toString(),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    logger.error({ status: res.status, body: text }, "SignalWire create call error");
+    throw new Error(`SignalWire error creating call: ${res.status}`);
+  }
+
+  return (await res.json()) as SignalWireCall;
 }
 
 export async function listMessages(params: {
