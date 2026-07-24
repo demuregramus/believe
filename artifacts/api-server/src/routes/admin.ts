@@ -87,14 +87,20 @@ router.get("/admin/financials", requireAdmin, async (req, res): Promise<void> =>
   });
 });
 
-// GET /admin/telemetry — Protected carrier quality telemetry metrics with RBAC
+// GET /admin/telemetry — Protected carrier quality telemetry metrics with dynamic session RBAC
 router.get("/admin/telemetry", requireAdmin, async (req, res): Promise<void> => {
+  const adminEmail = req.session?.adminEmail || "demuregram@gmail.com";
+  const isSuperAdmin = adminEmail.toLowerCase() === "demuregram@gmail.com";
+
   res.json({
     rbac: {
-      adminEmail: req.session?.adminEmail || "demuregram@gmail.com",
-      operatorRole: "SUPER_ADMIN",
-      grantedPermissions: ["READ_TELEMETRY", "MANAGE_SUBSCRIBERS", "VIEW_FINANCIALS", "EMERGENCY_E911_OVERRIDE"],
+      adminEmail,
+      operatorRole: isSuperAdmin ? "SUPER_ADMIN" : "OPERATOR_ADMIN",
+      grantedPermissions: isSuperAdmin
+        ? ["READ_TELEMETRY", "MANAGE_SUBSCRIBERS", "VIEW_FINANCIALS", "EMERGENCY_E911_OVERRIDE"]
+        : ["READ_TELEMETRY", "MANAGE_SUBSCRIBERS"],
       sessionExpiresInSec: 3600,
+      authenticatedAt: new Date().toISOString(),
     },
     smsDeliverySuccessRatePct: 99.8,
     carrierWebhookLatencyMs: 145,
@@ -114,6 +120,7 @@ router.get("/admin/telemetry", requireAdmin, async (req, res): Promise<void> => 
     timestamp: new Date().toISOString(),
   });
 });
+
 
 
 
