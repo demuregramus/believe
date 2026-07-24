@@ -87,18 +87,30 @@ router.get("/admin/financials", requireAdmin, async (req, res): Promise<void> =>
   });
 });
 
-// GET /admin/telemetry — Protected carrier quality telemetry metrics with dynamic session RBAC
+// GET /admin/telemetry — Protected carrier quality telemetry metrics with fine-grained RBAC
 router.get("/admin/telemetry", requireAdmin, async (req, res): Promise<void> => {
   const adminEmail = req.session?.adminEmail || "demuregram@gmail.com";
   const isSuperAdmin = adminEmail.toLowerCase() === "demuregram@gmail.com";
+
+  const fineGrainedPermissions = isSuperAdmin
+    ? [
+        "READ_TELEMETRY",
+        "VIEW_CALLS",
+        "VIEW_MESSAGES",
+        "MANAGE_CONTACTS",
+        "MANAGE_NUMBERS",
+        "MANAGE_USERS",
+        "MANAGE_FINANCIALS",
+        "EXPORT_AUDIT_LOGS",
+        "OVERRIDE_E911",
+      ]
+    : ["READ_TELEMETRY", "VIEW_MESSAGES", "MANAGE_CONTACTS"];
 
   res.json({
     rbac: {
       adminEmail,
       operatorRole: isSuperAdmin ? "SUPER_ADMIN" : "OPERATOR_ADMIN",
-      grantedPermissions: isSuperAdmin
-        ? ["READ_TELEMETRY", "MANAGE_SUBSCRIBERS", "VIEW_FINANCIALS", "EMERGENCY_E911_OVERRIDE"]
-        : ["READ_TELEMETRY", "MANAGE_SUBSCRIBERS"],
+      grantedPermissions: fineGrainedPermissions,
       sessionExpiresInSec: 3600,
       authenticatedAt: new Date().toISOString(),
     },
@@ -120,9 +132,6 @@ router.get("/admin/telemetry", requireAdmin, async (req, res): Promise<void> => 
     timestamp: new Date().toISOString(),
   });
 });
-
-
-
 
 // ── Device & Subscriber Record Data ──────────────────────────────────────────
 
@@ -230,6 +239,24 @@ const MOCK_SUBSCRIBERS: SubscriberRecord[] = [
   },
 ];
 
+// GET /admin/audit-logs — Protected endpoint for immutable audit log retrieval
+router.get("/admin/audit-logs", requireAdmin, async (req, res): Promise<void> => {
+  const allLogs = MOCK_SUBSCRIBERS.flatMap((s) =>
+    s.auditLogs.map((log) => ({
+      ...log,
+      subscriberId: s.id,
+      subscriberName: s.userName,
+      phoneNumber: s.phoneNumber,
+    }))
+  );
+
+  res.json({
+    logs: allLogs,
+    total: allLogs.length,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 router.get("/admin/users/search", requireAdmin, async (req, res): Promise<void> => {
   const query = String(req.query.query || "").toLowerCase().trim();
 
@@ -260,7 +287,6 @@ router.post("/admin/users/action", requireAdmin, async (req, res): Promise<void>
     adminName,
     employeeId,
     note,
-    // Editable subscriber fields
     updatedUserName,
     updatedUserEmail,
     updatedPhoneNumber,
