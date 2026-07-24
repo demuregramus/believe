@@ -16,30 +16,7 @@ export interface VoicemailRecord {
   createdAt: string;
 }
 
-const memoryVoicemailStore: VoicemailRecord[] = [
-  {
-    id: "vm_1",
-    from: "+14155552671",
-    to: "+18634738499",
-    durationSeconds: 24,
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    transcript: "Hey! Just calling to confirm our appointment for tomorrow afternoon at 2 PM. Give me a call back when you get a chance!",
-    read: false,
-    createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-  },
-  {
-    id: "vm_2",
-    from: "+12125558839",
-    to: "+18634738499",
-    durationSeconds: 18,
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    transcript: "Hi, this is Believe Support following up on your eSIM profile setup. Everything looks great on your account. Thanks!",
-    read: true,
-    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-  },
-];
-
-// GET /voicemail?phoneNumber=
+// GET /voicemail?phoneNumber= — 100% Database-driven voicemail query
 router.get("/voicemail", async (req, res): Promise<void> => {
   const phoneNumber = String(req.query.phoneNumber || "");
 
@@ -55,29 +32,22 @@ router.get("/voicemail", async (req, res): Promise<void> => {
       .orderBy(desc(voicemailsTable.createdAt))
       .limit(50);
 
-    if (rows.length > 0) {
-      res.json(
-        rows.map((v) => ({
-          id: String(v.id),
-          from: v.fromNumber,
-          to: v.toNumber,
-          durationSeconds: v.durationSeconds,
-          audioUrl: v.audioUrl,
-          transcript: v.transcript,
-          read: v.read,
-          createdAt: v.createdAt.toISOString(),
-        }))
-      );
-      return;
-    }
-  } catch {
-    // Fallback to memory
-  }
+    const response: VoicemailRecord[] = rows.map((v) => ({
+      id: String(v.id),
+      from: v.fromNumber,
+      to: v.toNumber,
+      durationSeconds: v.durationSeconds,
+      audioUrl: v.audioUrl,
+      transcript: v.transcript,
+      read: v.read,
+      createdAt: v.createdAt.toISOString(),
+    }));
 
-  const list = phoneNumber
-    ? memoryVoicemailStore.filter((v) => v.to === phoneNumber || v.from === phoneNumber)
-    : memoryVoicemailStore;
-  res.json(list);
+    res.json(response);
+  } catch (err) {
+    req.log.error({ err }, "Database query error for voicemails");
+    res.json([]);
+  }
 });
 
 // POST /voicemail — record new voicemail & trigger Speech-to-Text transcription
@@ -118,11 +88,9 @@ router.post("/voicemail", async (req, res): Promise<void> => {
       newVm.id = String(saved.id);
       newVm.createdAt = saved.createdAt.toISOString();
     }
-  } catch {
-    // Ignore DB error
+  } catch (err) {
+    req.log.warn({ err }, "DB insertion warning for voicemail");
   }
-
-  memoryVoicemailStore.unshift(newVm);
 
   // Broadcast zero-delay SSE voicemail event
   broadcastSseEvent("voicemail", newVm);
@@ -130,7 +98,7 @@ router.post("/voicemail", async (req, res): Promise<void> => {
   res.status(201).json(newVm);
 });
 
-// POST /voicemail/:id/read — mark voicemail as read
+// POST /voicemail/:id/read — mark voicemail as read in PostgreSQL
 router.post("/voicemail/:id/read", async (req, res): Promise<void> => {
   const id = req.params.id;
   try {
@@ -138,18 +106,14 @@ router.post("/voicemail/:id/read", async (req, res): Promise<void> => {
     if (!isNaN(numericId)) {
       await db.update(voicemailsTable).set({ read: true }).where(eq(voicemailsTable.id, numericId));
     }
-  } catch {
-    // Ignore DB error
+  } catch (err) {
+    req.log.warn({ err }, "DB update warning for voicemail read status");
   }
 
-  const item = memoryVoicemailStore.find((v) => v.id === id);
-  if (item) {
-    item.read = true;
-  }
-  res.json({ success: true, item });
+  res.json({ success: true, id });
 });
 
-// DELETE /voicemail/:id — delete voicemail
+// DELETE /voicemail/:id — delete voicemail from PostgreSQL
 router.delete("/voicemail/:id", async (req, res): Promise<void> => {
   const id = req.params.id;
   try {
@@ -157,15 +121,11 @@ router.delete("/voicemail/:id", async (req, res): Promise<void> => {
     if (!isNaN(numericId)) {
       await db.delete(voicemailsTable).where(eq(voicemailsTable.id, numericId));
     }
-  } catch {
-    // Ignore DB error
+  } catch (err) {
+    req.log.warn({ err }, "DB deletion warning for voicemail");
   }
 
-  const idx = memoryVoicemailStore.findIndex((v) => v.id === id);
-  if (idx !== -1) {
-    memoryVoicemailStore.splice(idx, 1);
-  }
-  res.json({ success: true });
+  res.json({ success: true, id });
 });
 
 export default router;

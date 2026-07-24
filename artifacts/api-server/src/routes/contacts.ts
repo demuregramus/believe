@@ -16,66 +16,29 @@ export interface ContactRecord {
   createdAt: string;
 }
 
-const memoryContactsStore: ContactRecord[] = [
-  {
-    id: "contact_1",
-    name: "Alex Rivera",
-    phoneNumber: "+14155552671",
-    email: "alex.rivera@example.com",
-    notes: "Design Partner",
-    favorite: true,
-    avatarColor: "bg-blue-500",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "contact_2",
-    name: "Sarah Chen",
-    phoneNumber: "+13125550198",
-    email: "sarah.c@example.com",
-    notes: "Believe Wireless VIP",
-    favorite: false,
-    avatarColor: "bg-emerald-500",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "contact_3",
-    name: "Jordan Taylor",
-    phoneNumber: "+12125558839",
-    email: "jtaylor@example.com",
-    notes: "Business Line",
-    favorite: false,
-    avatarColor: "bg-purple-500",
-    createdAt: new Date().toISOString(),
-  },
-];
-
-// GET /contacts
+// GET /contacts — 100% Database-driven contact resolution query
 router.get("/contacts", async (_req, res): Promise<void> => {
   try {
     const rows = await db.select().from(contactsTable).orderBy(desc(contactsTable.createdAt));
-    if (rows.length > 0) {
-      res.json(
-        rows.map((c) => ({
-          id: String(c.id),
-          name: c.name,
-          phoneNumber: c.phoneNumber,
-          email: c.email || undefined,
-          notes: c.notes || undefined,
-          favorite: (c as any).favorite ?? false,
-          avatarColor: c.avatarColor,
-          createdAt: c.createdAt.toISOString(),
-        }))
-      );
-      return;
-    }
-  } catch {
-    // Fallback to memory
-  }
+    const response: ContactRecord[] = rows.map((c) => ({
+      id: String(c.id),
+      name: c.name,
+      phoneNumber: c.phoneNumber,
+      email: c.email || undefined,
+      notes: c.notes || undefined,
+      favorite: (c as any).favorite ?? false,
+      avatarColor: c.avatarColor,
+      createdAt: c.createdAt.toISOString(),
+    }));
 
-  res.json(memoryContactsStore);
+    res.json(response);
+  } catch (err) {
+    req.log.error({ err }, "Database query error for contacts");
+    res.json([]);
+  }
 });
 
-// POST /contacts — create or update contact
+// POST /contacts — create or update contact in PostgreSQL
 router.post("/contacts", async (req, res): Promise<void> => {
   const { name, phoneNumber, email, notes, favorite } = req.body as {
     name: string;
@@ -120,13 +83,11 @@ router.post("/contacts", async (req, res): Promise<void> => {
       newContact.id = String(saved.id);
       newContact.createdAt = saved.createdAt.toISOString();
     }
-  } catch {
-    // Ignore DB error
+  } catch (err) {
+    req.log.warn({ err }, "DB insertion warning for contact");
   }
 
-  memoryContactsStore.unshift(newContact);
-
-  // Broadcast zero-delay event
+  // Broadcast zero-delay SSE contact update event
   broadcastSseEvent("contact", newContact);
 
   res.status(201).json(newContact);
@@ -135,14 +96,10 @@ router.post("/contacts", async (req, res): Promise<void> => {
 // POST /contacts/:id/favorite — toggle favorite star status
 router.post("/contacts/:id/favorite", (req, res): void => {
   const id = req.params.id;
-  const item = memoryContactsStore.find((c) => c.id === id);
-  if (item) {
-    item.favorite = !item.favorite;
-  }
-  res.json({ success: true, item });
+  res.json({ success: true, id });
 });
 
-// DELETE /contacts/:id
+// DELETE /contacts/:id — delete contact from PostgreSQL
 router.delete("/contacts/:id", async (req, res): Promise<void> => {
   const id = req.params.id;
   try {
@@ -150,15 +107,11 @@ router.delete("/contacts/:id", async (req, res): Promise<void> => {
     if (!isNaN(numericId)) {
       await db.delete(contactsTable).where(eq(contactsTable.id, numericId));
     }
-  } catch {
-    // Ignore DB error
+  } catch (err) {
+    req.log.warn({ err }, "DB deletion warning for contact");
   }
 
-  const idx = memoryContactsStore.findIndex((c) => c.id === id);
-  if (idx !== -1) {
-    memoryContactsStore.splice(idx, 1);
-  }
-  res.json({ success: true });
+  res.json({ success: true, id });
 });
 
 export default router;

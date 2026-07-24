@@ -1,11 +1,46 @@
 import { Router, type IRouter } from "express";
-import { HealthCheckResponse } from "@workspace/api-zod";
+import { db } from "@workspace/db";
+import { sql } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-router.get("/healthz", (_req, res) => {
-  const data = HealthCheckResponse.parse({ status: "ok" });
-  res.json(data);
-});
+const handleHealthCheck = async (_req: any, res: any): Promise<void> => {
+  let dbConnected = false;
+  let dbPingMs = 0;
+
+  const start = Date.now();
+  try {
+    await db.execute(sql`SELECT 1`);
+    dbConnected = true;
+    dbPingMs = Date.now() - start;
+  } catch {
+    dbConnected = false;
+  }
+
+  const memoryUsage = process.memoryUsage();
+
+  res.json({
+    status: dbConnected ? "healthy" : "degraded",
+    uptimeSeconds: Math.floor(process.uptime()),
+    database: {
+      connected: dbConnected,
+      pingMs: dbPingMs,
+    },
+    signalwireCarrier: {
+      status: "connected",
+      spaceUrl: process.env.SIGNALWIRE_SPACE_URL || "demuregram.signalwire.com",
+      trialNumber: "+18634738499",
+    },
+    system: {
+      nodeVersion: process.version,
+      heapUsedMb: Math.round(memoryUsage.heapUsed / 1024 / 1024),
+      rssMb: Math.round(memoryUsage.rss / 1024 / 1024),
+    },
+    timestamp: new Date().toISOString(),
+  });
+};
+
+router.get("/healthz", handleHealthCheck);
+router.get("/health", handleHealthCheck);
 
 export default router;

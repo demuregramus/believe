@@ -11,41 +11,11 @@ export interface CallRecord {
   to: string;
   direction: "incoming" | "outgoing" | "missed";
   durationSeconds: number;
-  status: "completed" | "missed" | "busy" | "no-answer";
+  status: "completed" | "missed" | "busy" | "no-answer" | "ringing";
   createdAt: string;
 }
 
-const memoryCallsStore: CallRecord[] = [
-  {
-    id: "call_1",
-    from: "+14155552671",
-    to: "+18634738499",
-    direction: "incoming",
-    durationSeconds: 142,
-    status: "completed",
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-  },
-  {
-    id: "call_2",
-    from: "+18634738499",
-    to: "+13125550198",
-    direction: "outgoing",
-    durationSeconds: 85,
-    status: "completed",
-    createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-  },
-  {
-    id: "call_3",
-    from: "+12125558839",
-    to: "+18634738499",
-    direction: "missed",
-    durationSeconds: 0,
-    status: "missed",
-    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-  },
-];
-
-// GET /calls/webrtc-token — Issue WebRTC / SIP voice token for in-browser calling
+// GET /calls/webrtc-token — Issue WebRTC / SIP voice token with STUN/TURN media servers
 router.get("/calls/webrtc-token", (req, res): void => {
   const phoneNumber = String(req.query.phoneNumber || "+18634738499");
   res.json({
@@ -53,11 +23,16 @@ router.get("/calls/webrtc-token", (req, res): void => {
     spaceUrl: process.env.SIGNALWIRE_SPACE_URL || "demuregram.signalwire.com",
     projectId: process.env.SIGNALWIRE_PROJECT_ID || "dce9fe57-7237-4a59-9521-1cabbd77fc27",
     callerId: phoneNumber,
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      { urls: "stun:turn.signalwire.com:3478" },
+    ],
     expiresAt: new Date(Date.now() + 3600000).toISOString(),
   });
 });
 
-// GET /calls/history?phoneNumber=
+// GET /calls/history?phoneNumber= — 100% Database-driven CDR query
 router.get("/calls/history", async (req, res): Promise<void> => {
   const phoneNumber = String(req.query.phoneNumber || "");
 
@@ -73,31 +48,24 @@ router.get("/calls/history", async (req, res): Promise<void> => {
       .orderBy(desc(callsTable.createdAt))
       .limit(50);
 
-    if (rows.length > 0) {
-      res.json(
-        rows.map((c) => ({
-          id: String(c.id),
-          from: c.fromNumber,
-          to: c.toNumber,
-          direction: c.direction as any,
-          durationSeconds: c.durationSeconds,
-          status: c.status as any,
-          createdAt: c.createdAt.toISOString(),
-        }))
-      );
-      return;
-    }
-  } catch {
-    // Fallback to memory
-  }
+    const response: CallRecord[] = rows.map((c) => ({
+      id: String(c.id),
+      from: c.fromNumber,
+      to: c.toNumber,
+      direction: c.direction as any,
+      durationSeconds: c.durationSeconds,
+      status: c.status as any,
+      createdAt: c.createdAt.toISOString(),
+    }));
 
-  const calls = phoneNumber
-    ? memoryCallsStore.filter((c) => c.from === phoneNumber || c.to === phoneNumber)
-    : memoryCallsStore;
-  res.json(calls);
+    res.json(response);
+  } catch (err) {
+    req.log.error({ err }, "Database query error for call history");
+    res.json([]);
+  }
 });
 
-// POST /calls/dial — initiate or log a voice call session over WebRTC / SignalWire
+// POST /calls/dial — Initiate or log voice call session & save CDR to DB
 router.post("/calls/dial", async (req, res): Promise<void> => {
   const { from, to, durationSeconds, direction } = req.body as {
     from: string;
@@ -137,13 +105,11 @@ router.post("/calls/dial", async (req, res): Promise<void> => {
       newCall.id = String(saved.id);
       newCall.createdAt = saved.createdAt.toISOString();
     }
-  } catch {
-    // Ignore DB error
+  } catch (err) {
+    req.log.warn({ err }, "DB insertion warning for call");
   }
 
-  memoryCallsStore.unshift(newCall);
-
-  // Broadcast zero-delay SSE call event
+  // Broadcast zero-delay SSE call event to all connected clients
   broadcastSseEvent("call", newCall);
 
   res.status(201).json(newCall);
