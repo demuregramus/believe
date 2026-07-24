@@ -1,0 +1,17 @@
+{
+  "short_name": "Believe",
+  "name": "Believe Wireless Cloud Communications",
+  "description": "Unlimited texting, softphone voice calling, voicemail, and contacts.",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/web-messaging",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "display": "standalone",
+  "orientation": "portrait"
+}
