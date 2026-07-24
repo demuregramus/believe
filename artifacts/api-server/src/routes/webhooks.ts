@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, messagesTable, callsTable, voicemailsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import { broadcastSseEvent } from "./events";
 
 const router: IRouter = Router();
@@ -69,6 +70,31 @@ const handleInboundSmsWebhook = async (req: any, res: any): Promise<void> => {
   res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
 };
 
+// Carrier Real-Time SMS Delivery Status Callback Handler
+const handleSmsStatusCallback = async (req: any, res: any): Promise<void> => {
+  const { MessageSid, MessageStatus, SmsStatus } = req.body as {
+    MessageSid?: string;
+    MessageStatus?: string;
+    SmsStatus?: string;
+  };
+
+  const status = MessageStatus || SmsStatus || "delivered";
+  const sid = MessageSid || "";
+
+  req.log.info({ event: "SMS_STATUS_CALLBACK", messageSid: sid, status }, "[✓] Carrier SMS status callback received");
+
+  if (sid) {
+    try {
+      await db.update(messagesTable).set({ status }).where(eq(messagesTable.sid, sid));
+    } catch {
+      // Ignore update error
+    }
+  }
+
+  res.set("Content-Type", "text/xml");
+  res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+};
+
 // Inbound SignalWire Voice Call Webhook Handler
 const handleInboundVoiceWebhook = async (req: any, res: any): Promise<void> => {
   const { From, To, CallSid } = req.body as {
@@ -125,6 +151,24 @@ const handleInboundVoiceWebhook = async (req: any, res: any): Promise<void> => {
 
   res.set("Content-Type", "text/xml");
   res.send(twiml);
+};
+
+// Carrier Real-Time Voice Call Status Callback Handler
+const handleVoiceStatusCallback = async (req: any, res: any): Promise<void> => {
+  const { CallSid, CallStatus, CallDuration } = req.body as {
+    CallSid?: string;
+    CallStatus?: string;
+    CallDuration?: string;
+  };
+
+  const status = CallStatus || "completed";
+  const sid = CallSid || "";
+  const durationSeconds = CallDuration ? Number(CallDuration) : 0;
+
+  req.log.info({ event: "VOICE_STATUS_CALLBACK", callSid: sid, status, durationSeconds }, "[✓] Carrier Voice Call status callback received");
+
+  res.set("Content-Type", "text/xml");
+  res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
 };
 
 // Inbound Voicemail Callback Handler
@@ -191,7 +235,9 @@ const handleInboundVoicemailWebhook = async (req: any, res: any): Promise<void> 
 
 router.post("/signalwire/webhook", handleInboundSmsWebhook);
 router.post("/webhooks/sms", handleInboundSmsWebhook);
+router.post("/webhooks/sms/status", handleSmsStatusCallback);
 router.post("/webhooks/voice", handleInboundVoiceWebhook);
+router.post("/webhooks/voice/status", handleVoiceStatusCallback);
 router.post("/webhooks/voicemail", handleInboundVoicemailWebhook);
 
 export default router;

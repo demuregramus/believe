@@ -2,7 +2,8 @@ import { Router, type IRouter } from "express";
 import { db, callsTable } from "@workspace/db";
 import { eq, or, desc } from "drizzle-orm";
 import { broadcastSseEvent } from "./events";
-import { createCall } from "../lib/signalwire";
+import { createCall, getPublicBaseUrl } from "../lib/signalwire";
+
 
 const router: IRouter = Router();
 
@@ -95,12 +96,14 @@ router.post("/calls/dial", async (req, res): Promise<void> => {
     const carrierCall = await createCall({
       from: callerNumber,
       to,
+      statusCallback: `${getPublicBaseUrl()}/api/webhooks/voice/status`,
     });
     carrierCallSid = carrierCall.sid;
-    req.log.info({ carrierCallSid, to }, "SignalWire PSTN call initiated successfully");
+    req.log.info({ carrierCallSid, to }, "[✓] SignalWire PSTN call initiated successfully");
   } catch (err) {
     req.log.warn({ err }, "SignalWire carrier call dispatch fallback");
   }
+
 
   const newCall: CallRecord = {
     id: carrierCallSid,

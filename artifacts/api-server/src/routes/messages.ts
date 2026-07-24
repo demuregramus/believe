@@ -1,7 +1,8 @@
 import { Router, type IRouter } from "express";
 import { db, messagesTable } from "@workspace/db";
 import { eq, or, desc } from "drizzle-orm";
-import { sendSms } from "../lib/signalwire";
+import { sendSms, getPublicBaseUrl } from "../lib/signalwire";
+
 import { ListMessagesQueryParams } from "@workspace/api-zod";
 import { broadcastSseEvent } from "./events";
 
@@ -94,7 +95,12 @@ router.post("/messages", async (req, res): Promise<void> => {
 
   let sent;
   try {
-    sent = await sendSms({ from, to, body: body || (mediaUrl ? "[MMS Image]" : "") });
+    sent = await sendSms({
+      from,
+      to,
+      body: body || (mediaUrl ? "[MMS Image]" : ""),
+      statusCallback: `${getPublicBaseUrl()}/api/webhooks/sms/status`,
+    });
   } catch (err) {
     req.log.warn({ err }, "SignalWire carrier SMS dispatch fallback");
     sent = {
@@ -105,6 +111,7 @@ router.post("/messages", async (req, res): Promise<void> => {
       status: "queued",
     };
   }
+
 
   const newMsg: MessageRecord = {
     id: String(Date.now()),

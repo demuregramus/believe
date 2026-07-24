@@ -6,6 +6,10 @@ const SPACE_URL = process.env.SIGNALWIRE_SPACE_URL || "demuregram.signalwire.com
 
 const BASE_URL = `https://${SPACE_URL}/api/laml/2010-04-01/Accounts/${PROJECT_ID}`;
 
+export function getPublicBaseUrl(): string {
+  return process.env.PUBLIC_URL || "http://localhost:5001";
+}
+
 function authHeader(): string {
   return "Basic " + Buffer.from(`${PROJECT_ID}:${API_TOKEN}`).toString("base64");
 }
@@ -115,8 +119,14 @@ export async function sendSms(params: {
   from: string;
   to: string;
   body: string;
+  statusCallback?: string;
 }): Promise<SignalWireMessage> {
-  const body = new URLSearchParams({ From: params.from, To: params.to, Body: params.body });
+  const payload: Record<string, string> = { From: params.from, To: params.to, Body: params.body };
+  if (params.statusCallback) {
+    payload.StatusCallback = params.statusCallback;
+  }
+  const body = new URLSearchParams(payload);
+
   const res = await fetch(`${BASE_URL}/Messages.json`, {
     method: "POST",
     headers: {
@@ -133,20 +143,27 @@ export async function sendSms(params: {
     throw new Error(`SignalWire error sending SMS: ${res.status}`);
   }
 
-  return (await res.json()) as SignalWireMessage;
+  const result = (await res.json()) as SignalWireMessage;
+  logger.info({ sid: result.sid, from: params.from, to: params.to, status: result.status }, "[✓] SignalWire API response: Message created");
+  return result;
 }
 
 /**
- * Initiate a live outbound PSTN voice call via SignalWire REST API.
- * This instructs the telecom provider to dial destination physical phone numbers over the PSTN.
+ * Initiate a live outbound PSTN voice call via SignalWire REST API with real-time StatusCallback tracking.
  */
 export async function createCall(params: {
   from: string;
   to: string;
   url?: string;
+  statusCallback?: string;
 }): Promise<SignalWireCall> {
   const twimlUrl = params.url || "https://demo.twilio.com/welcome/voice/";
-  const body = new URLSearchParams({ From: params.from, To: params.to, Url: twimlUrl });
+  const payload: Record<string, string> = { From: params.from, To: params.to, Url: twimlUrl };
+  if (params.statusCallback) {
+    payload.StatusCallback = params.statusCallback;
+    payload.StatusCallbackEvent = "initiated ringing answered completed";
+  }
+  const body = new URLSearchParams(payload);
 
   const res = await fetch(`${BASE_URL}/Calls.json`, {
     method: "POST",
@@ -164,7 +181,9 @@ export async function createCall(params: {
     throw new Error(`SignalWire error creating call: ${res.status}`);
   }
 
-  return (await res.json()) as SignalWireCall;
+  const result = (await res.json()) as SignalWireCall;
+  logger.info({ sid: result.sid, from: params.from, to: params.to, status: result.status }, "[✓] SignalWire API response: Outbound PSTN Call initiated");
+  return result;
 }
 
 export async function listMessages(params: {
