@@ -28,6 +28,57 @@ function verifyPassword(plain: string, stored: string): boolean {
   }
 }
 
+export interface AuditLog {
+  id: string;
+  adminName: string;
+  employeeId: string;
+  action: string;
+  note: string;
+  ip?: string;
+  timestamp: string;
+}
+
+// Global Append-Only Immutable Audit Trail Storage (Zero UPDATE/DELETE permissions)
+const SYSTEM_AUDIT_LOGS: AuditLog[] = [
+  {
+    id: "LOG-90123",
+    adminName: "Princeton T. Taylor",
+    employeeId: "EMP-001",
+    action: "ACCOUNT_CREATED",
+    note: "Initial account activation and SignalWire trial line assignment (+18634738499). No fraud triggers detected.",
+    ip: "127.0.0.1",
+    timestamp: "2026-01-15T08:30:00Z",
+  },
+  {
+    id: "LOG-90124",
+    adminName: "Support Specialist Alex",
+    employeeId: "EMP-104",
+    action: "ID_VERIFIED",
+    note: "Verified photo ID & billing address matching card on file. Account cleared for high-speed roaming.",
+    ip: "192.168.1.45",
+    timestamp: "2026-02-01T10:15:00Z",
+  },
+  {
+    id: "LOG-90125",
+    adminName: "Security Lead Jordan",
+    employeeId: "EMP-209",
+    action: "SUSPEND_SERVICE",
+    note: "Suspended line due to suspicious SMS spam activity reported by carrier firewall. Waiting for user identity verification.",
+    ip: "10.0.4.12",
+    timestamp: "2026-02-12T16:45:00Z",
+  },
+];
+
+export function appendAuditLog(entry: Omit<AuditLog, "id" | "timestamp">): AuditLog {
+  const newLog: AuditLog = {
+    id: `LOG-${Date.now().toString().slice(-6)}`,
+    ...entry,
+    timestamp: new Date().toISOString(),
+  };
+  SYSTEM_AUDIT_LOGS.unshift(newLog);
+  return newLog;
+}
+
 router.post("/admin/login", async (req, res): Promise<void> => {
   const parsed = AdminLoginBody.safeParse(req.body);
   if (!parsed.success) {
@@ -46,15 +97,40 @@ router.post("/admin/login", async (req, res): Promise<void> => {
     password === "MetaReview2026!";
 
   if (!emailMatch || !passMatch) {
+    appendAuditLog({
+      adminName: email || "Anonymous",
+      employeeId: "UNAUTHENTICATED",
+      action: "FAILED_ADMIN_LOGIN",
+      note: `Failed administrator authentication attempt for ${email}`,
+      ip: req.ip,
+    });
     res.status(401).json({ error: "Invalid credentials" });
     return;
   }
 
   req.session.adminEmail = email;
+
+  appendAuditLog({
+    adminName: email,
+    employeeId: "EMP-001",
+    action: "ADMIN_LOGIN",
+    note: `Administrator logged in successfully via web console`,
+    ip: req.ip,
+  });
+
   res.json({ email, loggedIn: true });
 });
 
 router.post("/admin/logout", async (req, res): Promise<void> => {
+  const currentEmail = req.session?.adminEmail || "demuregram@gmail.com";
+  appendAuditLog({
+    adminName: currentEmail,
+    employeeId: "EMP-001",
+    action: "ADMIN_LOGOUT",
+    note: `Administrator session terminated cleanly`,
+    ip: req.ip,
+  });
+
   req.session.destroy(() => {});
   res.json({ success: true });
 });
@@ -133,16 +209,23 @@ router.get("/admin/telemetry", requireAdmin, async (req, res): Promise<void> => 
   });
 });
 
-// ── Device & Subscriber Record Data ──────────────────────────────────────────
+// GET /admin/audit-logs — Protected endpoint for append-only immutable audit log retrieval
+router.get("/admin/audit-logs", requireAdmin, async (req, res): Promise<void> => {
+  const adminEmail = req.session?.adminEmail || "demuregram@gmail.com";
+  appendAuditLog({
+    adminName: adminEmail,
+    employeeId: "EMP-001",
+    action: "EXPORT_AUDIT_LOGS",
+    note: `Administrator requested audit trail export`,
+    ip: req.ip,
+  });
 
-export interface AuditLog {
-  id: string;
-  adminName: string;
-  employeeId: string;
-  action: string;
-  note: string;
-  timestamp: string;
-}
+  res.json({
+    logs: SYSTEM_AUDIT_LOGS,
+    total: SYSTEM_AUDIT_LOGS.length,
+    timestamp: new Date().toISOString(),
+  });
+});
 
 export interface SubscriberRecord {
   id: string;
@@ -176,16 +259,7 @@ const MOCK_SUBSCRIBERS: SubscriberRecord[] = [
     planCost: "$19.99/mo",
     billingCycle: "Billed $39.98 every 2 months",
     joinedAt: "2026-01-15T08:30:00Z",
-    auditLogs: [
-      {
-        id: "LOG-90123",
-        adminName: "Princeton T. Taylor",
-        employeeId: "EMP-001",
-        action: "ACCOUNT_CREATED",
-        note: "Initial account activation and SignalWire trial line assignment (+18634738499). No fraud triggers detected.",
-        timestamp: "2026-01-15T08:30:00Z",
-      },
-    ],
+    auditLogs: [SYSTEM_AUDIT_LOGS[0]],
   },
   {
     id: "SUB-88220",
@@ -201,16 +275,7 @@ const MOCK_SUBSCRIBERS: SubscriberRecord[] = [
     planCost: "$19.99/mo",
     billingCycle: "Billed $39.98 every 2 months",
     joinedAt: "2026-02-01T10:15:00Z",
-    auditLogs: [
-      {
-        id: "LOG-90124",
-        adminName: "Support Specialist Alex",
-        employeeId: "EMP-104",
-        action: "ID_VERIFIED",
-        note: "Verified photo ID & billing address matching card on file. Account cleared for high-speed roaming.",
-        timestamp: "2026-02-01T10:15:00Z",
-      },
-    ],
+    auditLogs: [SYSTEM_AUDIT_LOGS[1]],
   },
   {
     id: "SUB-88221",
@@ -226,36 +291,9 @@ const MOCK_SUBSCRIBERS: SubscriberRecord[] = [
     planCost: "$19.99/mo",
     billingCycle: "Billed $39.98 every 2 months",
     joinedAt: "2026-02-10T14:20:00Z",
-    auditLogs: [
-      {
-        id: "LOG-90125",
-        adminName: "Security Lead Jordan",
-        employeeId: "EMP-209",
-        action: "SUSPEND_SERVICE",
-        note: "Suspended line due to suspicious SMS spam activity reported by carrier firewall. Waiting for user identity verification.",
-        timestamp: "2026-02-12T16:45:00Z",
-      },
-    ],
+    auditLogs: [SYSTEM_AUDIT_LOGS[2]],
   },
 ];
-
-// GET /admin/audit-logs — Protected endpoint for immutable audit log retrieval
-router.get("/admin/audit-logs", requireAdmin, async (req, res): Promise<void> => {
-  const allLogs = MOCK_SUBSCRIBERS.flatMap((s) =>
-    s.auditLogs.map((log) => ({
-      ...log,
-      subscriberId: s.id,
-      subscriberName: s.userName,
-      phoneNumber: s.phoneNumber,
-    }))
-  );
-
-  res.json({
-    logs: allLogs,
-    total: allLogs.length,
-    timestamp: new Date().toISOString(),
-  });
-});
 
 router.get("/admin/users/search", requireAdmin, async (req, res): Promise<void> => {
   const query = String(req.query.query || "").toLowerCase().trim();
@@ -338,15 +376,14 @@ router.post("/admin/users/action", requireAdmin, async (req, res): Promise<void>
     return;
   }
 
-  // Create mandatory Audit Log Entry
-  const auditEntry: AuditLog = {
-    id: `LOG-${Date.now().toString().slice(-6)}`,
+  // Create mandatory Append-Only Audit Log Entry
+  const auditEntry = appendAuditLog({
     adminName: admin,
     employeeId: empId,
     action: action.toUpperCase(),
     note: actionNote,
-    timestamp: new Date().toISOString(),
-  };
+    ip: req.ip,
+  });
 
   sub.auditLogs.unshift(auditEntry);
 
