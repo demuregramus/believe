@@ -59,7 +59,7 @@ router.get("/messages", async (req, res): Promise<void> => {
   }
 });
 
-// POST /messages — Send SMS / MMS via SignalWire & store in PostgreSQL
+// POST /messages — Send SMS / MMS via SignalWire & store in PostgreSQL with audit log
 router.post("/messages", async (req, res): Promise<void> => {
   const { from, to, body, mediaUrl } = req.body as {
     from: string;
@@ -118,6 +118,17 @@ router.post("/messages", async (req, res): Promise<void> => {
   } catch (err) {
     req.log.warn({ err }, "DB insertion warning for message");
   }
+
+  // Structured Telecom Audit Event
+  req.log.info({
+    event: "SMS_SENT",
+    messageId: newMsg.id,
+    from: newMsg.from,
+    to: newMsg.to,
+    hasMedia: !!newMsg.mediaUrl,
+    ip: req.ip,
+    timestamp: new Date().toISOString(),
+  });
 
   // Broadcast zero-delay SSE real-time event to all connected clients
   broadcastSseEvent("message", newMsg);

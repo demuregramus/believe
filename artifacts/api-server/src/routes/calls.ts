@@ -18,6 +18,14 @@ export interface CallRecord {
 // GET /calls/webrtc-token — Issue WebRTC / SIP voice token with STUN/TURN media servers
 router.get("/calls/webrtc-token", (req, res): void => {
   const phoneNumber = String(req.query.phoneNumber || "+18634738499");
+
+  req.log.info({
+    event: "WEBRTC_TOKEN_ISSUED",
+    phoneNumber,
+    ip: req.ip,
+    timestamp: new Date().toISOString(),
+  });
+
   res.json({
     token: `BW_WEBRTC_${Buffer.from(phoneNumber).toString("base64")}_${Date.now()}`,
     spaceUrl: process.env.SIGNALWIRE_SPACE_URL || "demuregram.signalwire.com",
@@ -109,6 +117,25 @@ router.post("/calls/dial", async (req, res): Promise<void> => {
     req.log.warn({ err }, "DB insertion warning for call");
   }
 
+  // Structured Telecom Audit Events
+  req.log.info({
+    event: "CALL_STARTED",
+    callId: newCall.id,
+    from: newCall.from,
+    to: newCall.to,
+    direction: newCall.direction,
+    ip: req.ip,
+    timestamp: new Date().toISOString(),
+  });
+
+  req.log.info({
+    event: "CALL_ENDED",
+    callId: newCall.id,
+    durationSeconds: newCall.durationSeconds,
+    status: newCall.status,
+    timestamp: new Date().toISOString(),
+  });
+
   // Broadcast zero-delay SSE call event to all connected clients
   broadcastSseEvent("call", newCall);
 
@@ -118,20 +145,24 @@ router.post("/calls/dial", async (req, res): Promise<void> => {
 // Softphone In-Call Control Endpoints
 router.post("/calls/hold", (req, res): void => {
   const { onHold } = req.body as { onHold: boolean };
+  req.log.info({ event: "CALL_HOLD_TOGGLED", onHold, ip: req.ip });
   res.json({ success: true, onHold });
 });
 
 router.post("/calls/record", (req, res): void => {
   const { isRecording } = req.body as { isRecording: boolean };
+  req.log.info({ event: "CALL_RECORDING_TOGGLED", isRecording, ip: req.ip });
   res.json({ success: true, isRecording });
 });
 
 router.post("/calls/transfer", (req, res): void => {
   const { targetNumber } = req.body as { targetNumber: string };
+  req.log.info({ event: "CALL_TRANSFERRED", targetNumber, ip: req.ip });
   res.json({ success: true, transferredTo: targetNumber });
 });
 
-router.post("/calls/merge", (_req, res): void => {
+router.post("/calls/merge", (req, res): void => {
+  req.log.info({ event: "CALLS_MERGED", ip: req.ip });
   res.json({ success: true, merged: true });
 });
 

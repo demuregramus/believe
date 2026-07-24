@@ -83,13 +83,14 @@ export function Footer() {
             Believe Wireless operations comply with Federal Communications Commission (FCC) regulations under 47 CFR Part 64, state public utility commission guidelines, and state auto-renewal law requirements. All wireless service plans auto-renew bi-monthly (every 2 months) with <strong>zero early termination penalties</strong>. Customers may cancel or modify recurring billing anytime within their account settings.
           </p>
           <p className="leading-relaxed">
-            <strong>Fee Disclosures:</strong> Itemized charges include transparent bi-monthly wireless service rates, a one-time physical SIM/eSIM digital installation fee ($1.99), and state/local telecom taxes &amp; regulatory surcharges ($0.99 calculated at state baseline rates of 2.5%–3.5%).
+            <strong>Fee &amp; Telecom Compliance Disclosures:</strong> Itemized charges include transparent bi-monthly wireless service rates, a one-time physical SIM/eSIM digital installation fee ($1.99), and state/local telecom taxes &amp; regulatory surcharges ($0.99 calculated at state baseline rates of 2.5%–3.5%). All messaging complies with A2P 10DLC carrier registration rules. In-call softphone recording complies with federal consent regulations (47 U.S.C. § 227) and displays an active recording status indicator.
           </p>
           <p className="leading-relaxed flex items-start gap-1.5 text-gray-400">
             <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
             <span><strong>E911 Notice:</strong> Wi-Fi Calling and Web Messaging Emergency 911 services require an up-to-date registered physical address. E911 service may be limited during power or broadband outages.</span>
           </p>
         </div>
+
 
         <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-500 text-sm">

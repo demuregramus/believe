@@ -52,6 +52,16 @@ const handleInboundSmsWebhook = async (req: any, res: any): Promise<void> => {
     req.log.warn({ err }, "Error inserting inbound SMS to DB, broadcasting live event");
   }
 
+  // Structured Telecom Audit Log
+  req.log.info({
+    event: "SMS_RECEIVED",
+    messageSid: newMsg.sid,
+    from: newMsg.from,
+    to: newMsg.to,
+    hasMedia: !!newMsg.mediaUrl,
+    timestamp: new Date().toISOString(),
+  });
+
   // Push instant 0-delay notification to all connected browser clients
   broadcastSseEvent("message", newMsg);
 
@@ -92,10 +102,17 @@ const handleInboundVoiceWebhook = async (req: any, res: any): Promise<void> => {
     // Ignore DB error
   }
 
+  req.log.info({
+    event: "CALL_RINGING_INBOUND",
+    callSid: newCall.id,
+    from: newCall.from,
+    to: newCall.to,
+    timestamp: new Date().toISOString(),
+  });
+
   // Push instant incoming call ringing notification to browser softphone
   broadcastSseEvent("call", newCall);
 
-  // Return TwiML XML to ring browser softphone and fallback to voicemail
   const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Say>Connecting call to Believe Wireless softphone line.</Say>
@@ -155,6 +172,15 @@ const handleInboundVoicemailWebhook = async (req: any, res: any): Promise<void> 
   } catch {
     // Ignore DB error
   }
+
+  req.log.info({
+    event: "VOICEMAIL_CREATED",
+    voicemailId: newVm.id,
+    from: newVm.from,
+    to: newVm.to,
+    durationSeconds: newVm.durationSeconds,
+    timestamp: new Date().toISOString(),
+  });
 
   // Push instant 0-delay voicemail notification to all connected browser clients
   broadcastSseEvent("voicemail", newVm);
