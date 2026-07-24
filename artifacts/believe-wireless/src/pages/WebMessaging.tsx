@@ -503,14 +503,15 @@ export default function WebMessaging() {
                                       : "bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm"
                                   }`}
                                 >
-                                  {msg.mediaUrl && (
+                                  {(msg as any).mediaUrl && (
                                     <img
-                                      src={msg.mediaUrl}
+                                      src={(msg as any).mediaUrl}
                                       alt="MMS Attachment"
                                       className="w-full max-h-60 object-cover rounded-xl mb-2.5 border border-white/20"
                                       onError={(e) => ((e.target as HTMLElement).style.display = "none")}
                                     />
                                   )}
+
                                   <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.body}</p>
                                 </div>
                                 <span className="text-[10px] text-gray-400 mt-1 mx-1 font-medium flex items-center gap-1">
